@@ -1,0 +1,19 @@
+[package]
+name = "stor-age"
+version = "0.1.0"
+authors = ["Christian Krause <christian.krause@mailbox.org>"]
+description = "analyze storage ageing"
+license = "GPL-3.0-or-later"
+readme = "README.md"
+documentation = "https://github.com/idiv-biodiversity/storAGE"
+homepage = "https://github.com/idiv-biodiversity/storAGE"
+repository = "https://github.com/idiv-biodiversity/storAGE"
+keywords = ["storage", "age"]
+categories = ["command-line-utilities"]
+
+[dependencies]
+atty = "^0.2"
+bytesize = "^1"
+clap = "^2"
+lazy_static = "^1"
+regex = "^1"
