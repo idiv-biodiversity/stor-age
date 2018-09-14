@@ -133,21 +133,34 @@ fn analyze(dir: &Path, config: &Config) -> io::Result<Acc> {
         Ok(Acc::new(len, access, modify))
     };
 
-    visit_dirs(dir, &fun)
+    visit_dirs(dir, &fun, config)
 }
 
-fn visit_dirs(dir: &Path, cb: &Fn(&DirEntry) -> io::Result<Acc>) -> io::Result<Acc> {
+fn visit_dirs(
+    dir: &Path,
+    cb: &Fn(&DirEntry) -> io::Result<Acc>,
+    config: &Config,
+) -> io::Result<Acc> {
     let mut sum = Acc::empty();
 
-    if dir.is_dir() {
-        for entry in fs::read_dir(dir)? {
-            let entry = entry?;
-            let path = entry.path();
+    for entry in fs::read_dir(dir)? {
+        let entry = entry?;
+        let path = entry.path();
 
-            if path.is_dir() {
-                sum += visit_dirs(&path, cb)?;
-            } else {
-                sum += cb(&entry)?;
+        if path.is_file() {
+            sum += cb(&entry)?;
+        } else if path.is_dir() {
+            if config.verbose {
+                eprintln!("decending into: {:?}", path);
+            }
+
+            sum += visit_dirs(&path, cb, config)?;
+        } else {
+            if config.debug {
+                eprintln!(
+                    "neither directory nor regular file, skipping: {:?}",
+                    path,
+                );
             }
         }
     }
