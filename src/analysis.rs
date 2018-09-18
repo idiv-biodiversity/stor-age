@@ -1,3 +1,6 @@
+use acc::Acc;
+use bytesize::ByteSize;
+use config::Config;
 use mktemp::Temp;
 use regex::Regex;
 use std::fs::{self, DirEntry, File};
@@ -6,14 +9,47 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::time::{Duration, SystemTime};
 
-use acc::Acc;
-use config::Config;
+pub fn analyze(dir: &str, config: &Config) -> io::Result<()> {
+    let path = Path::new(dir);
+
+    let Acc { total, access, modify } = if config.spectrum_scale {
+        analyze_spectrum_scale(path, config)?
+    } else {
+        analyze_universal(path, config)?
+    };
+
+    let t_b = ByteSize(total).to_string_as(true);
+    let a_p = ((access as f64) / (total as f64) * 100.0).round();
+    let a_b = ByteSize(access).to_string_as(true);
+    let m_p = ((modify as f64) / (total as f64) * 100.0).round();
+    let m_b = ByteSize(modify).to_string_as(true);
+
+    println!("{}: total: {}", dir, t_b);
+
+    println!(
+        "{}: unaccessed for {} days: {}% ({})",
+        dir,
+        config.age_days,
+        a_p,
+        a_b,
+    );
+
+    println!(
+        "{}: unmodified for {} days: {}% ({})",
+        dir,
+        config.age_days,
+        m_p,
+        m_b,
+    );
+
+    Ok(())
+}
 
 // ----------------------------------------------------------------------------
 // normal directory traversal
 // ----------------------------------------------------------------------------
 
-pub fn analyze(dir: &Path, config: &Config) -> io::Result<Acc> {
+fn analyze_universal(dir: &Path, config: &Config) -> io::Result<Acc> {
     let sys_time = SystemTime::now();
     let age = Duration::from_secs(config.age_days * 3600 * 24);
     let threshold = sys_time - age;
@@ -81,7 +117,7 @@ fn visit_dirs(
 // with spectrum scale we can use mmapplypolicy for faster execution
 // ----------------------------------------------------------------------------
 
-pub fn analyze_spectrum_scale(dir: &Path, config: &Config) -> io::Result<Acc> {
+fn analyze_spectrum_scale(dir: &Path, config: &Config) -> io::Result<Acc> {
     let tmp = Temp::new_dir()?;
     let mut policy = tmp.to_path_buf();
     policy.push(".policy");
