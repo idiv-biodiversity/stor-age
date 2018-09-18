@@ -5,9 +5,9 @@ authors = ["Christian Krause <christian.krause@mailbox.org>"]
 description = "show aging of directories"
 license = "GPL-3.0-or-later"
 readme = "README.md"
-documentation = "https://github.com/idiv-biodiversity/storAGE"
-homepage = "https://github.com/idiv-biodiversity/storAGE"
-repository = "https://github.com/idiv-biodiversity/storAGE"
+documentation = "https://github.com/idiv-biodiversity/stor-age"
+homepage = "https://github.com/idiv-biodiversity/stor-age"
+repository = "https://github.com/idiv-biodiversity/stor-age"
 keywords = ["storage", "age"]
 categories = ["command-line-utilities"]
 
