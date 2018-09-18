@@ -16,25 +16,45 @@ mod log;
 use analysis::analyze;
 use atty::Stream;
 use config::Config;
+use std::io::{self, BufRead};
 
 fn main() {
     let color = atty::is(Stream::Stdout);
-    let matches = cli::build(color).get_matches();
+    let args = cli::build(color).get_matches();
 
-    let age_days: u64 = matches.value_of("age").unwrap().parse().unwrap();
+    let age_days: u64 = args.value_of("age").unwrap().parse().unwrap();
 
     let config = Config {
-        debug: matches.is_present("debug"),
-        verbose: matches.is_present("verbose"),
+        debug: args.is_present("debug"),
+        verbose: args.is_present("verbose"),
         age_days,
-        spectrum_scale: matches.is_present("spectrum-scale"),
+        spectrum_scale: args.is_present("spectrum-scale"),
     };
 
-    for dir in matches.values_of("dir").unwrap() {
-        let result = analyze(dir, &config);
+    match args.values_of("dir") {
+        Some(dirs) => {
+            for dir in dirs {
+                analyze(dir, &config);
+            }
+        },
 
-        for error in result.err() {
-            log::error(format!("skipping directory {:?}: {}", dir, error));
-        }
+        None => {
+            let interactive = atty::is(Stream::Stdin);
+
+            if interactive {
+                log::warning("input is read from terminal");
+                log::warning("only experts do this on purpose");
+                log::warning("you may have forgotten to either");
+                log::warning("- specify directories on the command line or");
+                log::warning("- pipe data into this tool");
+                log::warning("press CTRL-D or CTRL-C to exit");
+            }
+
+            let stdin = io::stdin();
+
+            for line in stdin.lock().lines() {
+                analyze(&line.unwrap(), &config)
+            }
+        },
     }
 }

@@ -21,8 +21,11 @@ pub fn build(color: bool) -> App<'static, 'static> {
              .required(true)
              .validator(is_number))
         .arg(Arg::with_name("dir")
-             .help("directories for which to gather information")
-             .required(true)
+             .help("input directories")
+             .long_help("The input directories for which to gather \
+                         information. If none are given, directories are read \
+                         from standard input. This way, this tool can be used \
+                         in pipes that get their input from e.g. `find`.")
              .multiple(true)
              .validator(is_dir))
         .arg(Arg::with_name("debug")

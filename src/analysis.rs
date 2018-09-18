@@ -1,6 +1,7 @@
 use acc::Acc;
 use bytesize::ByteSize;
 use config::Config;
+use log;
 use mktemp::Temp;
 use regex::Regex;
 use std::fs::{self, DirEntry, File};
@@ -9,40 +10,50 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::time::{Duration, SystemTime};
 
-pub fn analyze(dir: &str, config: &Config) -> io::Result<()> {
+pub fn analyze(dir: &str, config: &Config) {
     let path = Path::new(dir);
 
-    let Acc { total, access, modify } = if config.spectrum_scale {
-        analyze_spectrum_scale(path, config)?
+    let result = if config.spectrum_scale {
+        analyze_spectrum_scale(path, config)
     } else {
-        analyze_universal(path, config)?
+        analyze_universal(path, config)
     };
 
-    let t_b = ByteSize(total).to_string_as(true);
-    let a_p = ((access as f64) / (total as f64) * 100.0).round();
-    let a_b = ByteSize(access).to_string_as(true);
-    let m_p = ((modify as f64) / (total as f64) * 100.0).round();
-    let m_b = ByteSize(modify).to_string_as(true);
+    match result {
+        Ok(acc) => {
+            let Acc { total, access, modify } = acc;
 
-    println!("{}: total: {}", dir, t_b);
+            let t_b = ByteSize(total).to_string_as(true);
+            let a_p = ((access as f64) / (total as f64) * 100.0).round();
+            let a_b = ByteSize(access).to_string_as(true);
+            let m_p = ((modify as f64) / (total as f64) * 100.0).round();
+            let m_b = ByteSize(modify).to_string_as(true);
 
-    println!(
-        "{}: unaccessed for {} days: {}% ({})",
-        dir,
-        config.age_days,
-        a_p,
-        a_b,
-    );
+            println!("{}: total: {}", dir, t_b);
 
-    println!(
-        "{}: unmodified for {} days: {}% ({})",
-        dir,
-        config.age_days,
-        m_p,
-        m_b,
-    );
+            println!(
+                "{}: unaccessed for {} days: {}% ({})",
+                dir,
+                config.age_days,
+                a_p,
+                a_b,
+            );
 
-    Ok(())
+            println!(
+                "{}: unmodified for {} days: {}% ({})",
+                dir,
+                config.age_days,
+                m_p,
+                m_b,
+            );
+        },
+
+        Err(error) => {
+            log::error(
+                &format!("skipping directory {:?}: {}", dir, error)
+            );
+        }
+    }
 }
 
 // ----------------------------------------------------------------------------
