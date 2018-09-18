@@ -1,8 +1,8 @@
 use acc::Acc;
-use bytesize::ByteSize;
 use config::Config;
 use log;
 use mktemp::Temp;
+use output::{self, Output};
 use regex::Regex;
 use std::fs::{self, DirEntry, File};
 use std::io::{self, BufRead, BufReader, Write};
@@ -21,31 +21,13 @@ pub fn analyze(dir: &str, config: &Config) {
 
     match result {
         Ok(acc) => {
-            let Acc { total, access, modify } = acc;
+            match config.output {
+                Output::Pretty =>
+                    output::pretty(dir, acc, &config.age_days),
 
-            let t_b = ByteSize(total).to_string_as(true);
-            let a_p = ((access as f64) / (total as f64) * 100.0).round();
-            let a_b = ByteSize(access).to_string_as(true);
-            let m_p = ((modify as f64) / (total as f64) * 100.0).round();
-            let m_b = ByteSize(modify).to_string_as(true);
-
-            println!("{}: total: {}", dir, t_b);
-
-            println!(
-                "{}: unaccessed for {} days: {}% ({})",
-                dir,
-                config.age_days,
-                a_p,
-                a_b,
-            );
-
-            println!(
-                "{}: unmodified for {} days: {}% ({})",
-                dir,
-                config.age_days,
-                m_p,
-                m_b,
-            );
+                Output::Oneline =>
+                    output::oneline(dir, acc),
+            }
         },
 
         Err(error) => {

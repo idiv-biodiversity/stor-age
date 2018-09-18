@@ -12,10 +12,12 @@ mod analysis;
 mod cli;
 mod config;
 mod log;
+mod output;
 
 use analysis::analyze;
 use atty::Stream;
 use config::Config;
+use output::Output;
 use std::io::{self, BufRead};
 
 fn main() {
@@ -24,11 +26,15 @@ fn main() {
 
     let age_days: u64 = args.value_of("age").unwrap().parse().unwrap();
 
+    let output = value_t!(args, "format", Output)
+        .unwrap_or_else(|e| e.exit());
+
     let config = Config {
         debug: args.is_present("debug"),
         verbose: args.is_present("verbose"),
         age_days,
         spectrum_scale: args.is_present("spectrum-scale"),
+        output,
     };
 
     match args.values_of("dir") {

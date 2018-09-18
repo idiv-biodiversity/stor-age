@@ -1,4 +1,5 @@
 use clap::{App, AppSettings, Arg};
+use output::Output;
 use regex::Regex;
 use std::path::Path;
 
@@ -38,6 +39,20 @@ pub fn build(color: bool) -> App<'static, 'static> {
              .long("verbose")
              .help("verbose output")
              .display_order(2))
+        .arg(Arg::with_name("format")
+             .long("format")
+             .help("output format")
+             .long_help(
+                 "Specify output format. Pretty is intended for \
+                  human-readable interactive use. Oneline is intended as \
+                  machine-readable output that shows a colon (\":\") \
+                  separated list of total, unaccessed, and unmodified size in \
+                  bytes, followed by the directory."
+             )
+             .takes_value(true)
+             .case_insensitive(true)
+             .possible_values(&Output::variants())
+             .default_value("Pretty"))
         .arg(Arg::with_name("spectrum-scale")
              .long("spectrum-scale")
              .help("use mmapplypolicy")
