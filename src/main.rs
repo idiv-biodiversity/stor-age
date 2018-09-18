@@ -15,6 +15,7 @@ mod acc;
 mod analysis;
 mod cli;
 mod config;
+mod log;
 
 use acc::Acc;
 use analysis::*;
@@ -34,25 +35,35 @@ fn main() {
         age_days,
     };
 
-    let Acc { total, access, modify } = if spectrum_scale {
-        analyze_spectrum_scale(dir, &config).unwrap()
+    let result = if spectrum_scale {
+        analyze_spectrum_scale(dir, &config)
     } else {
-        analyze(dir, &config).unwrap()
+        analyze(dir, &config)
     };
 
-    println!("total: {}", ByteSize(total).to_string_as(true));
+    match result {
+        Ok(acc) => {
+            let Acc { total, access, modify } = acc;
 
-    println!(
-        "unaccessed for {} days: {}% ({})",
-        config.age_days,
-        ((access as f64) / (total as f64) * 100.0).round(),
-        ByteSize(access).to_string_as(true),
-    );
+            println!("total: {}", ByteSize(total).to_string_as(true));
 
-    println!(
-        "unmodified for {} days: {}% ({})",
-        config.age_days,
-        ((modify as f64) / (total as f64) * 100.0).round(),
-        ByteSize(modify).to_string_as(true),
-    );
+            println!(
+                "unaccessed for {} days: {}% ({})",
+                config.age_days,
+                ((access as f64) / (total as f64) * 100.0).round(),
+                ByteSize(access).to_string_as(true),
+            );
+
+            println!(
+                "unmodified for {} days: {}% ({})",
+                config.age_days,
+                ((modify as f64) / (total as f64) * 100.0).round(),
+                ByteSize(modify).to_string_as(true),
+            );
+        },
+
+        Err(error) => {
+            log::error(format!("skipping directory {:?}: {}", dir, error));
+        },
+    }
 }
