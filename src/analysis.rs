@@ -4,19 +4,17 @@ use log;
 use mktemp::Temp;
 use output::{self, Output};
 use regex::Regex;
-use std::fs::{self, DirEntry, File};
+use std::fs::{self, File};
 use std::io::{self, BufRead, BufReader, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::time::{Duration, SystemTime};
 
 pub fn analyze(dir: &str, config: &Config) {
-    let path = Path::new(dir);
-
     let result = if config.spectrum_scale {
-        analyze_spectrum_scale(path, config)
+        analyze_spectrum_scale(dir, config)
     } else {
-        analyze_universal(path, config)
+        analyze_universal(dir, config)
     };
 
     match result {
@@ -32,7 +30,7 @@ pub fn analyze(dir: &str, config: &Config) {
 
         Err(error) => {
             log::error(
-                &format!("skipping directory {:?}: {}", dir, error)
+                &format!("skipping directory {}: {}", dir, error)
             );
         }
     }
@@ -42,41 +40,17 @@ pub fn analyze(dir: &str, config: &Config) {
 // normal directory traversal
 // ----------------------------------------------------------------------------
 
-fn analyze_universal(dir: &Path, config: &Config) -> io::Result<Acc> {
+fn analyze_universal(dir: &str, config: &Config) -> io::Result<Acc> {
     let sys_time = SystemTime::now();
     let age = Duration::from_secs(config.age_days * 3600 * 24);
     let threshold = sys_time - age;
 
-    let fun = |entry: &DirEntry| -> io::Result<Acc> {
-        if config.debug {
-            println!("visiting entry: {:?}: ", entry);
-        }
-
-        let meta = entry.metadata()?;
-
-        let len = meta.len();
-
-        let access = if meta.accessed()? < threshold {
-            len
-        } else {
-            0
-        };
-
-        let modify = if meta.modified()? < threshold {
-            len
-        } else {
-            0
-        };
-
-        Ok(Acc::new(len, access, modify))
-    };
-
-    visit_dirs(dir, &fun, config)
+    visit_dirs(Path::new(dir), threshold, config)
 }
 
 fn visit_dirs(
     dir: &Path,
-    f: &Fn(&DirEntry) -> io::Result<Acc>,
+    threshold: SystemTime,
     config: &Config,
 ) -> io::Result<Acc> {
     let mut sum = Acc::empty();
@@ -86,13 +60,33 @@ fn visit_dirs(
         let path = entry.path();
 
         if path.is_file() {
-            sum += f(&entry)?;
-        } else if path.is_dir() {
-            if config.verbose {
-                eprintln!("decending into: {:?}", path);
+            if config.debug {
+                println!("visiting entry: {:?}: ", entry);
             }
 
-            sum += visit_dirs(&path, f, config)?;
+            let meta = entry.metadata()?;
+
+            let len = meta.len();
+
+            let access = if meta.accessed()? < threshold {
+                len
+            } else {
+                0
+            };
+
+            let modify = if meta.modified()? < threshold {
+                len
+            } else {
+                0
+            };
+
+            sum += Acc::new(len, access, modify);
+        } else if path.is_dir() {
+            if config.verbose {
+                eprintln!("descending into: {:?}", path);
+            }
+
+            sum += visit_dirs(&path, threshold, config)?;
         } else {
             if config.debug {
                 eprintln!(
@@ -110,7 +104,7 @@ fn visit_dirs(
 // with spectrum scale we can use mmapplypolicy for faster execution
 // ----------------------------------------------------------------------------
 
-fn analyze_spectrum_scale(dir: &Path, config: &Config) -> io::Result<Acc> {
+fn analyze_spectrum_scale(dir: &str, config: &Config) -> io::Result<Acc> {
     let tmp = Temp::new_dir()?;
     let mut policy = tmp.to_path_buf();
     policy.push(".policy");
