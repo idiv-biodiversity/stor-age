@@ -11,8 +11,9 @@ pub fn build(color: bool) -> App<'static, 'static> {
 
     App::new(crate_name!())
         .version(crate_version!())
-        .global_setting(color)
         .about(crate_description!())
+        .global_setting(color)
+        .max_term_width(80)
         .help_short("?")
         .help_message("show this help output")
         .version_message("show version")
