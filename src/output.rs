@@ -12,8 +12,13 @@ arg_enum! {
 pub fn pretty(dir: &str, acc: Acc, age: &u64) {
     let Acc { total, access, modify } = acc;
 
-    let a_p = ((access as f64) / (total as f64) * 100.0).round();
-    let m_p = ((modify as f64) / (total as f64) * 100.0).round();
+    let (a_p, m_p) = if total == 0 {
+        (0.0, 0.0)
+    } else {
+        let a_p = ((access as f64) / (total as f64) * 100.0).round();
+        let m_p = ((modify as f64) / (total as f64) * 100.0).round();
+        (a_p, m_p)
+    };
 
     let t_b = ByteSize(total).to_string_as(true);
     let a_b = ByteSize(access).to_string_as(true);
