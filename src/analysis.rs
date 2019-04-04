@@ -4,7 +4,7 @@ use log;
 use mktemp::Temp;
 use output::{self, Output};
 use regex::Regex;
-use std::fs::{self, File};
+use std::fs::{self, read_link, File};
 use std::io::{self, BufRead, BufReader, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -58,10 +58,17 @@ fn visit_dirs(
     for entry in fs::read_dir(dir)? {
         let entry = entry?;
         let path = entry.path();
+        let link = read_link(path.clone());
 
-        if path.is_file() {
+        if link.is_ok() {
             if config.debug {
-                println!("visiting entry: {:?}: ", entry);
+                println!("skipping link: {:?}", path);
+            }
+
+            continue;
+        } else if path.is_file() {
+            if config.debug {
+                println!("visiting entry: {:?}", entry);
             }
 
             let meta = entry.metadata()?;
