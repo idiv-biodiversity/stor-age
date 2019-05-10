@@ -1,7 +1,10 @@
 use clap::{App, AppSettings, Arg};
-use output::Output;
+use clap::{crate_description, crate_name, crate_version};
+use lazy_static::lazy_static;
 use regex::Regex;
 use std::path::Path;
+
+use crate::output::Output;
 
 pub fn build(color: bool) -> App<'static, 'static> {
     let color = if color {

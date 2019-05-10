@@ -1,4 +1,4 @@
-use output::Output;
+use crate::output::Output;
 
 pub struct Config {
     pub debug: bool,

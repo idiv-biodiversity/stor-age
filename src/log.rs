@@ -1,3 +1,5 @@
+use clap::crate_name;
+
 pub fn error(message: &str) {
     eprintln!("{}: {}", crate_name!(), message);
 }

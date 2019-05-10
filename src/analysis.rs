@@ -1,14 +1,16 @@
-use acc::Acc;
-use config::Config;
-use log;
+use lazy_static::lazy_static;
 use mktemp::Temp;
-use output::{self, Output};
 use regex::Regex;
 use std::fs::{self, read_link, File};
 use std::io::{self, BufRead, BufReader, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::time::{Duration, SystemTime};
+
+use crate::acc::Acc;
+use crate::config::Config;
+use crate::log;
+use crate::output::{self, Output};
 
 pub fn analyze(dir: &str, config: &Config) {
     let result = if config.spectrum_scale {

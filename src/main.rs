@@ -1,12 +1,3 @@
-extern crate atty;
-extern crate bytesize;
-#[macro_use]
-extern crate clap;
-#[macro_use]
-extern crate lazy_static;
-extern crate mktemp;
-extern crate regex;
-
 mod acc;
 mod analysis;
 mod cli;
@@ -14,11 +5,13 @@ mod config;
 mod log;
 mod output;
 
-use analysis::analyze;
 use atty::Stream;
+use clap::value_t;
+use std::io::{self, BufRead};
+
+use analysis::analyze;
 use config::Config;
 use output::Output;
-use std::io::{self, BufRead};
 
 fn main() {
     let color = atty::is(Stream::Stdout);
