@@ -9,7 +9,7 @@ arg_enum! {
     }
 }
 
-pub fn pretty(dir: &str, acc: Acc, age: &u64) {
+pub fn pretty(dir: &str, acc: Acc, age: u64) {
     let Acc { total, access, modify } = acc;
 
     let (a_p, m_p) = if total == 0 {

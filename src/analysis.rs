@@ -21,7 +21,7 @@ pub fn analyze(dir: &str, config: &Config) {
         Ok(acc) => {
             match config.output {
                 Output::Pretty =>
-                    output::pretty(dir, acc, &config.age_days),
+                    output::pretty(dir, acc, config.age_days),
 
                 Output::Oneline =>
                     output::oneline(dir, acc),
@@ -94,13 +94,11 @@ fn visit_dirs(
             }
 
             sum += visit_dirs(&path, threshold, config)?;
-        } else {
-            if config.debug {
-                eprintln!(
-                    "neither directory nor regular file, skipping: {:?}",
-                    path,
-                );
-            }
+        } else if config.debug {
+            eprintln!(
+                "neither directory nor regular file, skipping: {:?}",
+                path,
+            );
         }
     }
 
