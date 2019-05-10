@@ -12,7 +12,11 @@ arg_enum! {
 }
 
 pub fn pretty(dir: &str, acc: Acc, age: u64) {
-    let Acc { total, access, modify } = acc;
+    let Acc {
+        total,
+        access,
+        modify,
+    } = acc;
 
     let (a_p, m_p) = if total == 0 {
         (0.0, 0.0)
@@ -27,30 +31,16 @@ pub fn pretty(dir: &str, acc: Acc, age: u64) {
     let m_b = ByteSize(modify).to_string_as(true);
 
     println!("{}: {}", dir, t_b);
-
-    println!(
-        "unaccessed for {} days: {}% ({})",
-        age,
-        a_p,
-        a_b,
-    );
-
-    println!(
-        "unmodified for {} days: {}% ({})",
-        age,
-        m_p,
-        m_b,
-    );
+    println!("unaccessed for {} days: {}% ({})", age, a_p, a_b,);
+    println!("unmodified for {} days: {}% ({})", age, m_p, m_b,);
 }
 
 pub fn oneline(dir: &str, acc: Acc) {
-    let Acc { total, access, modify } = acc;
-
-    println!(
-        "{}:{}:{}:{}",
+    let Acc {
         total,
         access,
         modify,
-        dir,
-    );
+    } = acc;
+
+    println!("{}:{}:{}:{}", total, access, modify, dir,);
 }

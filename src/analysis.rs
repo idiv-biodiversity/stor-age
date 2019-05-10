@@ -20,20 +20,13 @@ pub fn analyze(dir: &str, config: &Config) {
     };
 
     match result {
-        Ok(acc) => {
-            match config.output {
-                Output::Pretty =>
-                    output::pretty(dir, acc, config.age_days),
-
-                Output::Oneline =>
-                    output::oneline(dir, acc),
-            }
+        Ok(acc) => match config.output {
+            Output::Pretty => output::pretty(dir, acc, config.age_days),
+            Output::Oneline => output::oneline(dir, acc),
         },
 
         Err(error) => {
-            log::error(
-                &format!("skipping directory {}: {}", dir, error)
-            );
+            log::error(&format!("skipping directory {}: {}", dir, error));
         }
     }
 }
@@ -77,17 +70,8 @@ fn visit_dirs(
 
             let len = meta.len();
 
-            let access = if meta.accessed()? < threshold {
-                len
-            } else {
-                0
-            };
-
-            let modify = if meta.modified()? < threshold {
-                len
-            } else {
-                0
-            };
+            let access = if meta.accessed()? < threshold { len } else { 0 };
+            let modify = if meta.modified()? < threshold { len } else { 0 };
 
             sum += Acc::new(len, access, modify);
         } else if path.is_dir() {
@@ -148,7 +132,7 @@ fn analyze_spectrum_scale(dir: &str, config: &Config) -> io::Result<Acc> {
     } else {
         Err(io::Error::new(
             io::ErrorKind::Other,
-            "mmapplypolicy was no success"
+            "mmapplypolicy was no success",
         ))
     }
 }
@@ -156,7 +140,8 @@ fn analyze_spectrum_scale(dir: &str, config: &Config) -> io::Result<Acc> {
 fn write_policy_file(file: &PathBuf, config: &Config) -> io::Result<()> {
     let mut file = File::create(file)?;
 
-    let content = format!("
+    let content = format!(
+        "
 define(access_age, (DAYS(CURRENT_TIMESTAMP) - DAYS(ACCESS_TIME)))
 define(modify_age, (DAYS(CURRENT_TIMESTAMP) - DAYS(MODIFICATION_TIME)))
 
@@ -167,7 +152,9 @@ RULE EXTERNAL LIST 'modify' EXEC ''
 RULE 'TOTAL' LIST 'total' SHOW(VARCHAR(FILE_SIZE))
 RULE 'ACCESS' LIST 'access' SHOW(VARCHAR(FILE_SIZE)) WHERE (access_age > {})
 RULE 'MODIFY' LIST 'modify' SHOW(VARCHAR(FILE_SIZE)) WHERE (modify_age > {})
-", config.age_days, config.age_days);
+",
+        config.age_days, config.age_days
+    );
 
     file.write_all(content.as_bytes())?;
 
@@ -179,9 +166,8 @@ fn sum_bytes(file: &Path) -> io::Result<u64> {
 
     if file.exists() {
         lazy_static! {
-            static ref RE_LIST: Regex = Regex::new(
-                r#"^\d+\s+\d+\s+\d+\s+(\d+)\s+--"#
-            ).unwrap();
+            static ref RE_LIST: Regex =
+                Regex::new(r#"^\d+\s+\d+\s+\d+\s+(\d+)\s+--"#).unwrap();
         }
 
         let file = File::open(file)?;

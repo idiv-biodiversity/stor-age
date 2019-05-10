@@ -19,8 +19,7 @@ fn main() {
 
     let age_days: u64 = args.value_of("age").unwrap().parse().unwrap();
 
-    let output = value_t!(args, "format", Output)
-        .unwrap_or_else(|e| e.exit());
+    let output = value_t!(args, "format", Output).unwrap_or_else(|e| e.exit());
 
     let config = Config {
         debug: args.is_present("debug"),
@@ -35,7 +34,7 @@ fn main() {
             for dir in dirs {
                 analyze(dir, &config);
             }
-        },
+        }
 
         None => {
             let interactive = atty::is(Stream::Stdin);
@@ -54,6 +53,6 @@ fn main() {
             for line in stdin.lock().lines() {
                 analyze(&line.unwrap(), &config)
             }
-        },
+        }
     }
 }

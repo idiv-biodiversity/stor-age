@@ -8,7 +8,11 @@ pub struct Acc {
 
 impl Acc {
     pub fn new(total: u64, access: u64, modify: u64) -> Acc {
-        Acc { total, access, modify }
+        Acc {
+            total,
+            access,
+            modify,
+        }
     }
 
     pub fn empty() -> Acc {
