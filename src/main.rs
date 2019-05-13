@@ -22,7 +22,6 @@ fn main() {
 
     let config = Config {
         debug: args.is_present("debug"),
-        verbose: args.is_present("verbose"),
         age_days,
         output,
 

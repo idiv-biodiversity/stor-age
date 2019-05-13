@@ -47,12 +47,6 @@ pub fn build(color: bool) -> App<'static, 'static> {
         .possible_values(&Output::variants())
         .default_value("Pretty");
 
-    let verbose = Arg::with_name("verbose")
-        .short("v")
-        .long("verbose")
-        .help("verbose output")
-        .display_order(2);
-
     let conditional_compilation_args: Vec<Arg> =
         vec![#[cfg(feature = "spectrum-scale")]
         Arg::with_name("spectrum-scale")
@@ -76,7 +70,6 @@ pub fn build(color: bool) -> App<'static, 'static> {
         .arg(age)
         .arg(dir)
         .arg(debug)
-        .arg(verbose)
         .arg(format)
         .args(&conditional_compilation_args)
 }

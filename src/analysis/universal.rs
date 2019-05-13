@@ -46,7 +46,7 @@ fn visit_dirs(
 
             sum += Acc::new(len, access, modify);
         } else if path.is_dir() {
-            if config.verbose {
+            if config.debug {
                 eprintln!("descending into: {:?}", path);
             }
 
