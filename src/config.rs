@@ -1,5 +1,6 @@
 use crate::output::Output;
 
+#[derive(Clone, Copy)]
 pub struct Config {
     pub debug: bool,
     pub verbose: bool,

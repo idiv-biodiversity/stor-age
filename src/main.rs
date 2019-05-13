@@ -32,7 +32,7 @@ fn main() {
     match args.values_of("dir") {
         Some(dirs) => {
             for dir in dirs {
-                analyze(dir, &config);
+                analyze(dir, config);
             }
         }
 
@@ -51,7 +51,7 @@ fn main() {
             let stdin = io::stdin();
 
             for line in stdin.lock().lines() {
-                analyze(&line.unwrap(), &config)
+                analyze(&line.unwrap(), config)
             }
         }
     }

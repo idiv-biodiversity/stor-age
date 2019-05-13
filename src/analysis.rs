@@ -12,7 +12,7 @@ use crate::config::Config;
 use crate::log;
 use crate::output::{self, Output};
 
-pub fn analyze(dir: &str, config: &Config) {
+pub fn analyze(dir: &str, config: Config) {
     let result = if config.spectrum_scale {
         analyze_spectrum_scale(dir, config)
     } else {
@@ -35,7 +35,7 @@ pub fn analyze(dir: &str, config: &Config) {
 // normal directory traversal
 // ----------------------------------------------------------------------------
 
-fn analyze_universal(dir: &str, config: &Config) -> io::Result<Acc> {
+fn analyze_universal(dir: &str, config: Config) -> io::Result<Acc> {
     let sys_time = SystemTime::now();
     let age = Duration::from_secs(config.age_days * 3600 * 24);
     let threshold = sys_time - age;
@@ -46,7 +46,7 @@ fn analyze_universal(dir: &str, config: &Config) -> io::Result<Acc> {
 fn visit_dirs(
     dir: &Path,
     threshold: SystemTime,
-    config: &Config,
+    config: Config,
 ) -> io::Result<Acc> {
     let mut sum = Acc::empty();
 
@@ -95,7 +95,7 @@ fn visit_dirs(
 // with spectrum scale we can use mmapplypolicy for faster execution
 // ----------------------------------------------------------------------------
 
-fn analyze_spectrum_scale(dir: &str, config: &Config) -> io::Result<Acc> {
+fn analyze_spectrum_scale(dir: &str, config: Config) -> io::Result<Acc> {
     let tmp = Temp::new_dir()?;
     let mut policy = tmp.to_path_buf();
     policy.push(".policy");
@@ -137,7 +137,7 @@ fn analyze_spectrum_scale(dir: &str, config: &Config) -> io::Result<Acc> {
     }
 }
 
-fn write_policy_file(file: &PathBuf, config: &Config) -> io::Result<()> {
+fn write_policy_file(file: &PathBuf, config: Config) -> io::Result<()> {
     let mut file = File::create(file)?;
 
     let content = format!(
