@@ -20,7 +20,8 @@ pub fn build(color: bool) -> App<'static, 'static> {
 
     let debug = Arg::with_name("debug")
         .long("debug")
-        .help("debug output")
+        .long_help("Adds very verbose output useful for debugging.")
+        .hidden_short_help(true)
         .display_order(2);
 
     let dir = Arg::with_name("dir")
