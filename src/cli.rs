@@ -72,7 +72,6 @@ pub fn build(color: bool) -> App<'static, 'static> {
         .version(crate_version!())
         .about(crate_description!())
         .global_setting(color)
-        .max_term_width(80)
         .help_short("?")
         .arg(age)
         .arg(dir)
