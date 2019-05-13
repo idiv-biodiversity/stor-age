@@ -9,7 +9,6 @@ use atty::Stream;
 use clap::value_t;
 use std::io::{self, BufRead};
 
-use analysis::analyze;
 use config::Config;
 use output::Output;
 
@@ -25,14 +24,16 @@ fn main() {
         debug: args.is_present("debug"),
         verbose: args.is_present("verbose"),
         age_days,
-        spectrum_scale: args.is_present("spectrum-scale"),
         output,
+
+        #[cfg(feature = "spectrum-scale")]
+        spectrum_scale: args.is_present("spectrum-scale"),
     };
 
     match args.values_of("dir") {
         Some(dirs) => {
             for dir in dirs {
-                analyze(dir, config);
+                analysis::run(dir, config);
             }
         }
 
@@ -51,7 +52,7 @@ fn main() {
             let stdin = io::stdin();
 
             for line in stdin.lock().lines() {
-                analyze(&line.unwrap(), config)
+                analysis::run(&line.unwrap(), config)
             }
         }
     }

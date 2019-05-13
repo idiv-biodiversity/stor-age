@@ -17,11 +17,14 @@ matrix:
         - rustup component add clippy
         - rustup component add rustfmt
       script:
-        - cargo clippy -- -D warnings
+        - cargo clippy --all-features -- -D warnings
         - cargo fmt -- --check
-        - cargo test --verbose
+        - cargo test --all-features --verbose
   allow_failures:
     - rust: nightly
+
+script:
+  - cargo test --all-features --verbose
 
 cache: cargo
 

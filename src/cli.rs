@@ -13,6 +13,22 @@ pub fn build(color: bool) -> App<'static, 'static> {
         AppSettings::ColorNever
     };
 
+    let conditional_compilation_args: Vec<Arg> =
+        vec![#[cfg(feature = "spectrum-scale")]
+        Arg::with_name("spectrum-scale")
+            .long("spectrum-scale")
+            .help("use mmapplypolicy")
+            .long_help(
+                "On IBM Spectrum Scale file systems exists a dedicated \
+                 command that allows more efficient file system traversal, \
+                 called `mmapplypolicy`. Using this flag forces the usage of \
+                 this command over the universal directory traversal. At the \
+                 time of this writing, according to Spectrum Scale \
+                 documentation, only the super-user `root` may use the \
+                 `mmapplypolicy` command.",
+            )
+            .display_order(1)];
+
     App::new(crate_name!())
         .version(crate_version!())
         .about(crate_description!())
@@ -68,21 +84,7 @@ pub fn build(color: bool) -> App<'static, 'static> {
                 .possible_values(&Output::variants())
                 .default_value("Pretty"),
         )
-        .arg(
-            Arg::with_name("spectrum-scale")
-                .long("spectrum-scale")
-                .help("use mmapplypolicy")
-                .long_help(
-                    "On IBM Spectrum Scale file systems exists a dedicated \
-                     command that allows more efficient file system traversal, \
-                     called `mmapplypolicy`. Using this flag forces the usage of \
-                     this command over the universal directory traversal. At the \
-                     time of this writing, according to Spectrum Scale \
-                     documentation, only the super-user `root` may use the \
-                     `mmapplypolicy` command.",
-                )
-                .display_order(1),
-        )
+        .args(&conditional_compilation_args)
 }
 
 fn is_dir(s: String) -> Result<(), String> {
