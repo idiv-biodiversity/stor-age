@@ -6,28 +6,14 @@ mod log;
 mod output;
 
 use atty::Stream;
-use clap::value_t;
 use std::io::{self, BufRead};
 
 use config::Config;
-use output::Output;
 
 fn main() {
     let color = atty::is(Stream::Stdout);
     let args = cli::build(color).get_matches();
-
-    let age_days: u64 = args.value_of("age").unwrap().parse().unwrap();
-
-    let output = value_t!(args, "format", Output).unwrap_or_else(|e| e.exit());
-
-    let config = Config {
-        debug: args.is_present("debug"),
-        age_days,
-        output,
-
-        #[cfg(feature = "spectrum-scale")]
-        spectrum_scale: args.is_present("spectrum-scale"),
-    };
+    let config = Config::from_args(&args);
 
     match args.values_of("dir") {
         Some(dirs) => {
