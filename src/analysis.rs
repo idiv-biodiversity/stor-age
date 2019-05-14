@@ -19,7 +19,7 @@ pub fn run(dir: &str, config: Config) {
         },
 
         Err(error) => {
-            log::error(&format!("skipping directory {}: {}", dir, error));
+            log::error(format!("skipping directory {}: {}", dir, error));
         }
     }
 }

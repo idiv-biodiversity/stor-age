@@ -1,9 +1,17 @@
 use clap::crate_name;
 
-pub fn error(message: &str) {
-    eprintln!("{}: {}", crate_name!(), message);
+use crate::config::Config;
+
+pub fn debug<S: AsRef<str>>(message: S, config: Config) {
+    if config.debug {
+        eprintln!("{}: {}", crate_name!(), message.as_ref())
+    }
 }
 
-pub fn warn(message: &str) {
-    eprintln!("{}: warning: {}", crate_name!(), message);
+pub fn error<S: AsRef<str>>(message: S) {
+    eprintln!("{}: {}", crate_name!(), message.as_ref());
+}
+
+pub fn warn<S: AsRef<str>>(message: S) {
+    eprintln!("{}: warning: {}", crate_name!(), message.as_ref());
 }

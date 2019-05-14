@@ -5,6 +5,7 @@ use std::time::{Duration, SystemTime};
 
 use crate::acc::Acc;
 use crate::config::Config;
+use crate::log;
 
 pub fn run(dir: &str, config: Config) -> io::Result<Acc> {
     let sys_time = SystemTime::now();
@@ -27,15 +28,11 @@ fn visit_dirs(
         let link = read_link(path.clone());
 
         if link.is_ok() {
-            if config.debug {
-                println!("skipping link: {:?}", path);
-            }
+            log::debug(format!("skipping link: {:?}", path), config);
 
             continue;
         } else if path.is_file() {
-            if config.debug {
-                println!("visiting entry: {:?}", entry);
-            }
+            log::debug(format!("visiting entry: {:?}", entry), config);
 
             let meta = entry.metadata()?;
 
@@ -46,16 +43,16 @@ fn visit_dirs(
 
             sum += Acc::new(len, access, modify);
         } else if path.is_dir() {
-            if config.debug {
-                eprintln!("descending into: {:?}", path);
-            }
+            log::debug(format!("descending into: {:?}", path), config);
 
             sum += visit_dirs(&path, threshold, config)?;
-        } else if config.debug {
-            eprintln!(
+        } else {
+            let message = format!(
                 "neither directory nor regular file, skipping: {:?}",
-                path,
+                path
             );
+
+            log::debug(message, config);
         }
     }
 
