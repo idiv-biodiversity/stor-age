@@ -37,7 +37,7 @@ fn main() {
             let stdin = io::stdin();
 
             for line in stdin.lock().lines() {
-                analysis::run(&line.unwrap(), config)
+                analysis::run(&line.unwrap().trim(), config)
             }
         }
     }
