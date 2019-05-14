@@ -25,7 +25,7 @@ fn visit_dirs(
     for entry in fs::read_dir(dir)? {
         let entry = entry?;
         let path = entry.path();
-        let link = read_link(path.clone());
+        let link = read_link(&path);
 
         if link.is_ok() {
             log::debug(format!("skipping link: {:?}", path), config);
