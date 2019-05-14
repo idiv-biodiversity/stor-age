@@ -4,6 +4,6 @@ pub fn error(message: &str) {
     eprintln!("{}: {}", crate_name!(), message);
 }
 
-pub fn warning(message: &str) {
+pub fn warn(message: &str) {
     eprintln!("{}: warning: {}", crate_name!(), message);
 }
