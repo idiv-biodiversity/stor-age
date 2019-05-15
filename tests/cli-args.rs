@@ -39,3 +39,16 @@ fn arg_dir_not_a_dir() -> Result<(), Box<Error>> {
 
     Ok(())
 }
+
+#[cfg(target_family = "unix")]
+#[test]
+fn arg_dir_permission_denied() -> Result<(), Box<Error>> {
+    let mut cmd = Command::cargo_bin(crate_name!()).unwrap();
+    cmd.arg("90").arg("/root");
+
+    cmd.assert()
+        .failure()
+        .stderr(predicate::str::contains("permission denied"));
+
+    Ok(())
+}
