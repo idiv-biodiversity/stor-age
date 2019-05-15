@@ -1,5 +1,6 @@
-use std::fs::{self, read_link};
-use std::io;
+use std::error::Error;
+use std::fs::{self, ReadDir};
+use std::io::{self, ErrorKind};
 use std::path::Path;
 use std::time::{Duration, SystemTime};
 
@@ -12,29 +13,38 @@ pub fn run(dir: &str, config: Config) -> io::Result<Acc> {
     let age = Duration::from_secs(config.age_days * 3600 * 24);
     let threshold = sys_time - age;
 
-    visit_dirs(Path::new(dir), threshold, config)
+    walk(Path::new(dir), threshold, config)
 }
 
-fn visit_dirs(
-    dir: &Path,
+fn walk(dir: &Path, threshold: SystemTime, config: Config) -> io::Result<Acc> {
+    let sum = Acc::empty();
+
+    match fs::read_dir(dir) {
+        Ok(entries) => iterate(entries, sum, threshold, config),
+
+        Err(ref error) if error.kind() == ErrorKind::PermissionDenied => {
+            log::info(format!("skipping: {:?}: {}", dir, error.description()));
+            Ok(sum)
+        }
+
+        Err(error) => Err(error),
+    }
+}
+
+fn iterate(
+    entries: ReadDir,
+    mut sum: Acc,
     threshold: SystemTime,
     config: Config,
 ) -> io::Result<Acc> {
-    let mut sum = Acc::empty();
-
-    for entry in fs::read_dir(dir)? {
+    for entry in entries {
         let entry = entry?;
         let path = entry.path();
-        let link = read_link(&path);
+        let meta = entry.metadata()?;
+        let file_type = meta.file_type();
 
-        if link.is_ok() {
-            log::debug(format!("skipping link: {:?}", path), config);
-
-            continue;
-        } else if path.is_file() {
-            log::debug(format!("visiting entry: {:?}", entry), config);
-
-            let meta = entry.metadata()?;
+        if file_type.is_file() {
+            log::debug(format!("visiting: {:?}", path), config);
 
             let len = meta.len();
 
@@ -42,17 +52,18 @@ fn visit_dirs(
             let modify = if meta.modified()? < threshold { len } else { 0 };
 
             sum += Acc::new(len, access, modify);
-        } else if path.is_dir() {
-            log::debug(format!("descending into: {:?}", path), config);
+        } else if file_type.is_dir() {
+            log::debug(format!("descending: {:?}", path), config);
 
-            sum += visit_dirs(&path, threshold, config)?;
+            sum += walk(&path, threshold, config)?;
         } else {
-            let message = format!(
-                "neither directory nor regular file, skipping: {:?}",
-                path
+            log::debug(
+                format!(
+                    "skipping: {:?}: neither regular file nor directory",
+                    path
+                ),
+                config,
             );
-
-            log::debug(message, config);
         }
     }
 
