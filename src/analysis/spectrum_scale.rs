@@ -8,6 +8,7 @@ use tempfile::tempdir;
 
 use crate::acc::Acc;
 use crate::config::Config;
+use crate::log;
 
 pub fn run(dir: &str, config: Config) -> io::Result<Acc> {
     let tmp = tempdir()?;
@@ -17,17 +18,24 @@ pub fn run(dir: &str, config: Config) -> io::Result<Acc> {
 
     write_policy_file(&policy, config)?;
 
-    let mut child = Command::new("mmapplypolicy")
+    let mut command = Command::new("mmapplypolicy");
+    command
         .arg(dir)
         .args(&["-P", policy.to_str().unwrap()])
         .args(&["-f", prefix.to_str().unwrap()])
         .args(&["-I", "defer"])
-        .args(&["-L", "0"])
+        .args(&["-L", "0"]);
+
+    log::debug(format!("command: {:?}", command), config);
+
+    let mut child = command
         .stdout(Stdio::null())
         .spawn()
-        .expect("failed to execute child");
+        .expect("mmapplypolicy failed to start, make sure it's on your PATH");
 
-    let ecode = child.wait().expect("failed to wait on child");
+    log::debug("waiting for mmapplypolicy to finish", config);
+
+    let ecode = child.wait().expect("failed waiting on mmapplypolicy");
 
     if ecode.success() {
         let total_f = tmp.path().join("stor-age.list.total");
