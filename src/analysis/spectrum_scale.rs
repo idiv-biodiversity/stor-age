@@ -1,20 +1,19 @@
 use lazy_static::lazy_static;
-use mktemp::Temp;
 use regex::Regex;
 use std::fs::File;
 use std::io::{self, BufRead, BufReader, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+use tempfile::tempdir;
 
 use crate::acc::Acc;
 use crate::config::Config;
 
 pub fn run(dir: &str, config: Config) -> io::Result<Acc> {
-    let tmp = Temp::new_dir()?;
-    let mut policy = tmp.to_path_buf();
-    policy.push(".policy");
-    let mut prefix = tmp.to_path_buf();
-    prefix.push("stor-age");
+    let tmp = tempdir()?;
+
+    let policy = tmp.path().join(".policy");
+    let prefix = tmp.path().join("stor-age");
 
     write_policy_file(&policy, config)?;
 
@@ -31,12 +30,9 @@ pub fn run(dir: &str, config: Config) -> io::Result<Acc> {
     let ecode = child.wait().expect("failed to wait on child");
 
     if ecode.success() {
-        let mut total_f = tmp.to_path_buf();
-        total_f.push("stor-age.list.total");
-        let mut access_f = tmp.to_path_buf();
-        access_f.push("stor-age.list.access");
-        let mut modify_f = tmp.to_path_buf();
-        modify_f.push("stor-age.list.modify");
+        let total_f = tmp.path().join("stor-age.list.total");
+        let access_f = tmp.path().join("stor-age.list.access");
+        let modify_f = tmp.path().join("stor-age.list.modify");
 
         let tot_size = sum_bytes(&total_f)?;
         let acc_size = sum_bytes(&access_f)?;

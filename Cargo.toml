@@ -22,13 +22,13 @@ regex = "^1"
 version = "^2"
 features = ["wrap_help"]
 
-[dependencies.mktemp]
-version = "^0.4"
+[dependencies.tempfile]
+version = "^3"
 optional = true
 
 [features]
 default = []
-spectrum-scale = ["mktemp"]
+spectrum-scale = ["tempfile"]
 
 [dev-dependencies]
 assert_cmd = "^0.11"
