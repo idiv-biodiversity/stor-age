@@ -33,3 +33,4 @@ spectrum-scale = ["tempfile"]
 [dev-dependencies]
 assert_cmd = "^0.11"
 predicates = "^1"
+tempfile = "^3"
