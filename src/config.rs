@@ -7,6 +7,7 @@ pub struct Config {
     pub debug: bool,
     pub age_days: u64,
     pub output: Output,
+    pub one_file_system: bool,
 
     #[cfg(feature = "spectrum-scale")]
     pub spectrum_scale: bool,
@@ -23,6 +24,7 @@ impl Config {
             debug: args.is_present("debug"),
             age_days,
             output,
+            one_file_system: args.is_present("one-file-system"),
 
             #[cfg(feature = "spectrum-scale")]
             spectrum_scale: args.is_present("spectrum-scale"),

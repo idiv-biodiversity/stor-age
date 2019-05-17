@@ -1,6 +1,7 @@
 use std::error::Error;
 use std::fs::{self, ReadDir};
 use std::io::{self, ErrorKind};
+use std::os::unix::fs::MetadataExt;
 use std::path::Path;
 use std::time::{Duration, SystemTime};
 
@@ -13,14 +14,25 @@ pub fn run(dir: &str, config: Config) -> io::Result<Acc> {
     let age = Duration::from_secs(config.age_days * 3600 * 24);
     let threshold = sys_time - age;
 
-    walk(Path::new(dir), threshold, config)
+    let dev = if config.one_file_system {
+        Some(fs::metadata(dir)?.dev())
+    } else {
+        None
+    };
+
+    walk(Path::new(dir), threshold, dev, config)
 }
 
-fn walk(dir: &Path, threshold: SystemTime, config: Config) -> io::Result<Acc> {
+fn walk(
+    dir: &Path,
+    threshold: SystemTime,
+    dev: Option<u64>,
+    config: Config,
+) -> io::Result<Acc> {
     let sum = Acc::empty();
 
     match fs::read_dir(dir) {
-        Ok(entries) => iterate(entries, sum, threshold, config),
+        Ok(entries) => iterate(entries, sum, threshold, dev, config),
 
         Err(ref error) if error.kind() == ErrorKind::PermissionDenied => {
             log::info(format!("skipping: {:?}: {}", dir, error.description()));
@@ -35,6 +47,7 @@ fn iterate(
     entries: ReadDir,
     mut sum: Acc,
     threshold: SystemTime,
+    dev: Option<u64>,
     config: Config,
 ) -> io::Result<Acc> {
     for entry in entries {
@@ -43,7 +56,12 @@ fn iterate(
         let meta = entry.metadata()?;
         let file_type = meta.file_type();
 
-        if file_type.is_file() {
+        if config.one_file_system && dev_check(dev, &meta) {
+            log::debug(
+                format!("skipping: {:?}: different file system", path),
+                config,
+            );
+        } else if file_type.is_file() {
             log::debug(format!("visiting: {:?}", path), config);
 
             let len = meta.len();
@@ -55,7 +73,7 @@ fn iterate(
         } else if file_type.is_dir() {
             log::debug(format!("descending: {:?}", path), config);
 
-            sum += walk(&path, threshold, config)?;
+            sum += walk(&path, threshold, dev, config)?;
         } else {
             log::debug(
                 format!(
@@ -68,4 +86,8 @@ fn iterate(
     }
 
     Ok(sum)
+}
+
+fn dev_check(dev: Option<u64>, meta: &fs::Metadata) -> bool {
+    dev.map_or(false, |dev| dev != meta.dev())
 }

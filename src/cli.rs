@@ -50,8 +50,18 @@ pub fn build(color: bool) -> App<'static, 'static> {
         .possible_values(&Output::variants())
         .default_value("Pretty");
 
-    let conditional_compilation_args: Vec<Arg> =
-        vec![#[cfg(feature = "spectrum-scale")]
+    let one_fs = Arg::with_name("one-file-system")
+        .short("x")
+        .long("one-file-system")
+        .help("do not cross file system boundaries")
+        .long_help(
+"Do not cross file system boundaries, i.e. skip files and directories on \
+ different file systems than the directory being scanned."
+        )
+        .display_order(1);
+
+    let conditional_compilation_args: Vec<Arg> = vec![
+        #[cfg(feature = "spectrum-scale")]
         Arg::with_name("spectrum-scale")
             .long("spectrum-scale")
             .help("use mmapplypolicy instead of universal directory traversal")
@@ -63,7 +73,8 @@ pub fn build(color: bool) -> App<'static, 'static> {
  documentation, only the super-user `root` may use the `mmapplypolicy` \
  command.",
             )
-            .display_order(1)];
+            .display_order(1),
+    ];
 
     App::new(crate_name!())
         .version(crate_version!())
@@ -74,6 +85,7 @@ pub fn build(color: bool) -> App<'static, 'static> {
         .arg(dir)
         .arg(debug)
         .arg(format)
+        .arg(one_fs)
         .args(&conditional_compilation_args)
 }
 
