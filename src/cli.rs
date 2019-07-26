@@ -1,7 +1,5 @@
 use clap::{crate_description, crate_name, crate_version};
 use clap::{App, AppSettings, Arg};
-use lazy_static::lazy_static;
-use regex::Regex;
 use std::error::Error;
 use std::fs;
 use std::path::Path;
@@ -104,13 +102,9 @@ fn is_dir(s: String) -> Result<(), String> {
 }
 
 fn is_number(s: String) -> Result<(), String> {
-    lazy_static! {
-        static ref NUMBER_RE: Regex = Regex::new(r#"^\d+$"#).unwrap();
-    }
-
-    if NUMBER_RE.is_match(&s) {
+    if s.parse::<u64>().is_ok() {
         Ok(())
     } else {
-        Err(format!("not a number: {}", s))
+        Err(format!("not a positive number: {}", s))
     }
 }

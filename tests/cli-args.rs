@@ -11,7 +11,7 @@ fn arg_age_invalid() -> Result<(), Box<Error>> {
 
     cmd.assert()
         .failure()
-        .stderr(predicate::str::contains("not a number"));
+        .stderr(predicate::str::contains("not a positive number"));
 
     Ok(())
 }
