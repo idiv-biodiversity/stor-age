@@ -1,7 +1,7 @@
-use lazy_static::lazy_static;
-use regex::Regex;
+use bstr::io::BufReadExt;
+use bstr::ByteSlice;
 use std::fs::File;
-use std::io::{self, BufRead, BufReader, Write};
+use std::io::{self, BufReader, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use tempfile::tempdir;
@@ -83,20 +83,17 @@ fn sum_bytes(file: &Path) -> io::Result<u64> {
     let mut sum = 0;
 
     if file.exists() {
-        lazy_static! {
-            static ref RE_LIST: Regex =
-                Regex::new(r#"^\d+\s+\d+\s+\d+\s+(\d+)\s+--"#).unwrap();
-        }
-
         let file = File::open(file)?;
+        let file = BufReader::new(file);
 
-        for line in BufReader::new(file).lines() {
+        for line in file.byte_lines() {
             let line = line?;
 
-            for cap in RE_LIST.captures_iter(&line) {
-                let size: u64 = cap[1].parse().unwrap();
-                sum += size;
-            }
+            let size = line.splitn_str(6, " ").nth(4).unwrap();
+            let size = size.to_str().unwrap();
+            let size: u64 = size.parse().unwrap();
+
+            sum += size;
         }
     }
 

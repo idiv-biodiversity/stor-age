@@ -18,6 +18,10 @@ bytesize = "^1"
 lazy_static = "^1"
 regex = "^1"
 
+[dependencies.bstr]
+version = "^0.2"
+optional = true
+
 [dependencies.clap]
 version = "^2"
 features = ["wrap_help"]
@@ -28,7 +32,7 @@ optional = true
 
 [features]
 default = []
-spectrum-scale = ["tempfile"]
+spectrum-scale = ["bstr", "tempfile"]
 
 [dev-dependencies]
 assert_cmd = "^0.11"
