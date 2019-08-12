@@ -9,7 +9,7 @@ use crate::config::Config;
 use crate::log;
 use crate::output::{self, Output};
 
-pub fn run(dir: &str, config: Config) {
+pub fn run(dir: &str, config: &Config) {
     let result = run_conditional(dir, config);
 
     match result {
@@ -25,12 +25,12 @@ pub fn run(dir: &str, config: Config) {
 }
 
 #[cfg(not(feature = "spectrum-scale"))]
-fn run_conditional(dir: &str, config: Config) -> Result<Acc> {
+fn run_conditional(dir: &str, config: &Config) -> Result<Acc> {
     crate::analysis::universal::run(dir, config)
 }
 
 #[cfg(feature = "spectrum-scale")]
-fn run_conditional(dir: &str, config: Config) -> Result<Acc> {
+fn run_conditional(dir: &str, config: &Config) -> Result<Acc> {
     if config.spectrum_scale {
         crate::analysis::spectrum_scale::run(dir, config)
     } else {

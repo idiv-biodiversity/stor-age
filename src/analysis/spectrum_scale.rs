@@ -10,7 +10,7 @@ use crate::acc::Acc;
 use crate::config::Config;
 use crate::log;
 
-pub fn run(dir: &str, config: Config) -> io::Result<Acc> {
+pub fn run(dir: &str, config: &Config) -> io::Result<Acc> {
     let tmp = tempdir()?;
 
     let policy = tmp.path().join(".policy");
@@ -55,7 +55,7 @@ pub fn run(dir: &str, config: Config) -> io::Result<Acc> {
     }
 }
 
-fn write_policy_file(file: &PathBuf, config: Config) -> io::Result<()> {
+fn write_policy_file(file: &PathBuf, config: &Config) -> io::Result<()> {
     let mut file = File::create(file)?;
 
     let content = format!(

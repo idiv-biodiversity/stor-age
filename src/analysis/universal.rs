@@ -9,7 +9,7 @@ use crate::acc::Acc;
 use crate::config::Config;
 use crate::log;
 
-pub fn run(dir: &str, config: Config) -> io::Result<Acc> {
+pub fn run(dir: &str, config: &Config) -> io::Result<Acc> {
     let sys_time = SystemTime::now();
     let age = Duration::from_secs(config.age_days * 3600 * 24);
     let threshold = sys_time - age;
@@ -27,7 +27,7 @@ fn walk(
     dir: &Path,
     threshold: SystemTime,
     dev: Option<u64>,
-    config: Config,
+    config: &Config,
 ) -> io::Result<Acc> {
     let sum = Acc::empty();
 
@@ -48,7 +48,7 @@ fn iterate(
     mut sum: Acc,
     threshold: SystemTime,
     dev: Option<u64>,
-    config: Config,
+    config: &Config,
 ) -> io::Result<Acc> {
     for entry in entries {
         let entry = entry?;

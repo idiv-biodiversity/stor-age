@@ -18,7 +18,7 @@ fn main() {
     match args.values_of("dir") {
         Some(dirs) => {
             for dir in dirs {
-                analysis::run(dir, config);
+                analysis::run(dir, &config);
             }
         }
 
@@ -37,7 +37,7 @@ fn main() {
             let stdin = io::stdin();
 
             for line in stdin.lock().lines() {
-                analysis::run(&line.unwrap().trim(), config)
+                analysis::run(&line.unwrap().trim(), &config)
             }
         }
     }

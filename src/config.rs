@@ -2,7 +2,7 @@ use clap::{value_t, ArgMatches};
 
 use crate::output::Output;
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct Config {
     pub debug: bool,
     pub age_days: u64,
