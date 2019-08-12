@@ -29,6 +29,7 @@ pub fn run(dir: &str, config: &Config) -> io::Result<Acc> {
         .arg(dir)
         .args(&["-P", policy.to_str().unwrap()])
         .args(&["-f", prefix.to_str().unwrap()])
+        .args(&["--choice-algorithm", "fast"])
         .args(&["-I", "defer"])
         .args(&["-L", "0"]);
 
