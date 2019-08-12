@@ -83,6 +83,18 @@ pub fn build(color: bool) -> App<'static, 'static> {
             .takes_value(true)
             .value_name("nodes")
             .display_order(1),
+        #[cfg(feature = "spectrum-scale")]
+        Arg::with_name("spectrum-scale-g")
+            .long("spectrum-scale-g")
+            .help("use for mmapplypolicy -g argument")
+            .long_help(
+"Specify global work directory to use with `mmapplypolicy -g`. For detailed \
+ information, see `man mmapplypolicy`.",
+            )
+            .takes_value(true)
+            .value_name("dir")
+            .validator(is_dir)
+            .display_order(1),
     ];
 
     App::new(crate_name!())

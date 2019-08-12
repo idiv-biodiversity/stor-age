@@ -30,6 +30,10 @@ pub fn run(dir: &str, config: &Config) -> io::Result<Acc> {
         command.args(&["-N", nodes]);
     };
 
+    if let Some(ref global_work_dir) = config.spectrum_scale_global_work_dir {
+        command.args(&["-g", global_work_dir]);
+    };
+
     log::debug(format!("command: {:?}", command), config);
 
     let mut child = command
