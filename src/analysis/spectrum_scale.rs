@@ -26,6 +26,10 @@ pub fn run(dir: &str, config: &Config) -> io::Result<Acc> {
         .args(&["-I", "defer"])
         .args(&["-L", "0"]);
 
+    if let Some(ref nodes) = config.spectrum_scale_nodes {
+        command.args(&["-N", nodes]);
+    };
+
     log::debug(format!("command: {:?}", command), config);
 
     let mut child = command

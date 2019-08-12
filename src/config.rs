@@ -11,6 +11,9 @@ pub struct Config {
 
     #[cfg(feature = "spectrum-scale")]
     pub spectrum_scale: bool,
+
+    #[cfg(feature = "spectrum-scale")]
+    pub spectrum_scale_nodes: Option<String>,
 }
 
 impl Config {
@@ -28,6 +31,11 @@ impl Config {
 
             #[cfg(feature = "spectrum-scale")]
             spectrum_scale: args.is_present("spectrum-scale"),
+
+            #[cfg(feature = "spectrum-scale")]
+            spectrum_scale_nodes: args
+                .value_of("spectrum-scale-N")
+                .map(String::from),
         }
     }
 }

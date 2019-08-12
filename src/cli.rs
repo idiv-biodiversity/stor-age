@@ -72,6 +72,17 @@ pub fn build(color: bool) -> App<'static, 'static> {
  command.",
             )
             .display_order(1),
+        #[cfg(feature = "spectrum-scale")]
+        Arg::with_name("spectrum-scale-N")
+            .long("spectrum-scale-N")
+            .help("use for mmapplypolicy -N argument")
+            .long_help(
+"Specify list of nodes to use with `mmapplypolicy -N`. For detailed \
+ information, see `man mmapplypolicy`.",
+            )
+            .takes_value(true)
+            .value_name("nodes")
+            .display_order(1),
     ];
 
     App::new(crate_name!())
