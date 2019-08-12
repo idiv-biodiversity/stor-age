@@ -4,14 +4,20 @@ use std::fs::File;
 use std::io::{self, BufReader, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
-use tempfile::tempdir;
+use tempfile::{tempdir, tempdir_in};
 
 use crate::acc::Acc;
 use crate::config::Config;
 use crate::log;
 
 pub fn run(dir: &str, config: &Config) -> io::Result<Acc> {
-    let tmp = tempdir()?;
+    let tmp = if let Some(ref local_work_dir) =
+        config.spectrum_scale_local_work_dir
+    {
+        tempdir_in(local_work_dir)?
+    } else {
+        tempdir()?
+    };
 
     let policy = tmp.path().join(".policy");
     let prefix = tmp.path().join("stor-age");
@@ -28,6 +34,10 @@ pub fn run(dir: &str, config: &Config) -> io::Result<Acc> {
 
     if let Some(ref nodes) = config.spectrum_scale_nodes {
         command.args(&["-N", nodes]);
+    };
+
+    if let Some(ref local_work_dir) = config.spectrum_scale_local_work_dir {
+        command.args(&["-s", local_work_dir]);
     };
 
     if let Some(ref global_work_dir) = config.spectrum_scale_global_work_dir {

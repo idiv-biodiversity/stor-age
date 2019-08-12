@@ -17,6 +17,9 @@ pub struct Config {
 
     #[cfg(feature = "spectrum-scale")]
     pub spectrum_scale_global_work_dir: Option<String>,
+
+    #[cfg(feature = "spectrum-scale")]
+    pub spectrum_scale_local_work_dir: Option<String>,
 }
 
 impl Config {
@@ -43,6 +46,11 @@ impl Config {
             #[cfg(feature = "spectrum-scale")]
             spectrum_scale_global_work_dir: args
                 .value_of("spectrum-scale-g")
+                .map(String::from),
+
+            #[cfg(feature = "spectrum-scale")]
+            spectrum_scale_local_work_dir: args
+                .value_of("spectrum-scale-s")
                 .map(String::from),
         }
     }

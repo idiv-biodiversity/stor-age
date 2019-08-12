@@ -95,6 +95,22 @@ pub fn build(color: bool) -> App<'static, 'static> {
             .value_name("dir")
             .validator(is_dir)
             .display_order(1),
+        #[cfg(feature = "spectrum-scale")]
+        Arg::with_name("spectrum-scale-s")
+            .long("spectrum-scale-s")
+            .help("use for mmapplypolicy -s argument and policy output")
+            .long_help(
+"Specify local work directory to use with `mmapplypolicy -s`. Also, the \
+ output of the LIST policies will be written to this directory temporarily \
+ before being processed by this tool. Defaults to the system temporary \
+ directory. This might be too small for large directories, e.g. more than 30 \
+ GiB are needed for a directory with 180 million files. For detailed \
+ information about the `-s` argument, see `man mmapplypolicy`.",
+            )
+            .takes_value(true)
+            .value_name("dir")
+            .validator(is_dir)
+            .display_order(1),
     ];
 
     App::new(crate_name!())
