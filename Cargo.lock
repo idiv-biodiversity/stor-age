@@ -334,7 +334,7 @@ dependencies = [
 
 [[package]]
 name = "stor-age"
-version = "0.2.2"
+version = "0.2.3"
 dependencies = [
  "assert_cmd 0.11.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "atty 0.2.13 (registry+https://github.com/rust-lang/crates.io-index)",
