@@ -36,7 +36,10 @@ impl Config {
             one_file_system: args.is_present("one-file-system"),
 
             #[cfg(feature = "spectrum-scale")]
-            spectrum_scale: args.is_present("spectrum-scale"),
+            spectrum_scale: args.is_present("spectrum-scale")
+                || args.is_present("spectrum-scale-N")
+                || args.is_present("spectrum-scale-g")
+                || args.is_present("spectrum-scale-s"),
 
             #[cfg(feature = "spectrum-scale")]
             spectrum_scale_nodes: args
