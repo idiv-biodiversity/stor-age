@@ -6,11 +6,12 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use tempfile::{tempdir, tempdir_in};
 
-use crate::acc::Acc;
-use crate::config::Config;
 use crate::log;
+use crate::Acc;
+use crate::Config;
+use crate::{Error, ErrorKind, Result};
 
-pub fn run(dir: &str, config: &Config) -> io::Result<Acc> {
+pub fn run(dir: &str, config: &Config) -> Result {
     let tmp = if let Some(ref local_work_dir) =
         config.spectrum_scale_local_work_dir
     {
@@ -67,10 +68,7 @@ pub fn run(dir: &str, config: &Config) -> io::Result<Acc> {
 
         Ok(Acc::new(tot_size, acc_size, mod_size))
     } else {
-        Err(io::Error::new(
-            io::ErrorKind::Other,
-            "mmapplypolicy was no success",
-        ))
+        Err(Error::new("mmapplypolicy was no success", ErrorKind::Io))
     }
 }
 

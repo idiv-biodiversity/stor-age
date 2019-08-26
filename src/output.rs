@@ -1,7 +1,7 @@
 use bytesize::ByteSize;
 use clap::arg_enum;
 
-use crate::acc::Acc;
+use crate::Acc;
 
 arg_enum! {
     #[derive(Clone, Copy)]

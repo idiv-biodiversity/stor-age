@@ -1,15 +1,16 @@
 use std::error::Error;
 use std::fs::{self, ReadDir};
-use std::io::{self, ErrorKind};
+use std::io::ErrorKind;
 use std::os::unix::fs::MetadataExt;
 use std::path::Path;
 use std::time::{Duration, SystemTime};
 
-use crate::acc::Acc;
-use crate::config::Config;
 use crate::log;
+use crate::Acc;
+use crate::Config;
+use crate::Result;
 
-pub fn run(dir: &str, config: &Config) -> io::Result<Acc> {
+pub fn run(dir: &str, config: &Config) -> Result {
     let sys_time = SystemTime::now();
     let age = Duration::from_secs(config.age_days * 3600 * 24);
     let threshold = sys_time - age;
@@ -28,7 +29,7 @@ fn walk(
     threshold: SystemTime,
     dev: Option<u64>,
     config: &Config,
-) -> io::Result<Acc> {
+) -> Result {
     let sum = Acc::empty();
 
     match fs::read_dir(dir) {
@@ -39,7 +40,7 @@ fn walk(
             Ok(sum)
         }
 
-        Err(error) => Err(error),
+        Err(error) => Err(error.into()),
     }
 }
 
@@ -49,7 +50,7 @@ fn iterate(
     threshold: SystemTime,
     dev: Option<u64>,
     config: &Config,
-) -> io::Result<Acc> {
+) -> Result {
     for entry in entries {
         let entry = entry?;
         let path = entry.path();

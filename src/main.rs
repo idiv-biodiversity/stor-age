@@ -1,14 +1,10 @@
-mod acc;
-mod analysis;
 mod cli;
-mod config;
-mod log;
-mod output;
 
 use atty::Stream;
 use std::io::{self, BufRead};
 
-use config::Config;
+use stor_age::log;
+use stor_age::Config;
 
 fn main() {
     let color = atty::is(Stream::Stdout);
@@ -16,29 +12,32 @@ fn main() {
     let config = Config::from_args(&args);
 
     match args.values_of("dir") {
-        Some(dirs) => {
-            for dir in dirs {
-                analysis::run(dir, &config);
-            }
-        }
+        Some(dirs) => run_args(dirs, &config),
+        None => run_stdin(&config),
+    }
+}
 
-        None => {
-            let interactive = atty::is(Stream::Stdin);
+fn run_args(dirs: clap::Values, config: &Config) {
+    for dir in dirs {
+        stor_age::run(dir, &config);
+    }
+}
 
-            if interactive {
-                log::warn("input is read from terminal");
-                log::warn("only experts do this on purpose");
-                log::warn("you may have forgotten to either");
-                log::warn("- specify directories on the command line or");
-                log::warn("- pipe data into this tool");
-                log::warn("press CTRL-D or CTRL-C to exit");
-            }
+fn run_stdin(config: &Config) {
+    let interactive = atty::is(Stream::Stdin);
 
-            let stdin = io::stdin();
+    if interactive {
+        log::warn("input is read from terminal");
+        log::warn("only experts do this on purpose");
+        log::warn("you may have forgotten to either");
+        log::warn("- specify directories on the command line or");
+        log::warn("- pipe data into this tool");
+        log::warn("press CTRL-D or CTRL-C to exit");
+    }
 
-            for line in stdin.lock().lines() {
-                analysis::run(&line.unwrap().trim(), &config)
-            }
-        }
+    let stdin = io::stdin();
+
+    for line in stdin.lock().lines() {
+        stor_age::run(&line.unwrap().trim(), &config)
     }
 }

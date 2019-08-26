@@ -1,6 +1,6 @@
 use clap::crate_name;
 
-use crate::config::Config;
+use crate::Config;
 
 pub fn debug<S: AsRef<str>>(message: S, config: &Config) {
     if config.debug {

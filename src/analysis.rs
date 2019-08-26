@@ -2,12 +2,10 @@
 mod spectrum_scale;
 mod universal;
 
-use std::io::Result;
-
-use crate::acc::Acc;
-use crate::config::Config;
 use crate::log;
 use crate::output::{self, Output};
+use crate::Config;
+use crate::Result;
 
 pub fn run(dir: &str, config: &Config) {
     let result = run_conditional(dir, config);
@@ -25,12 +23,12 @@ pub fn run(dir: &str, config: &Config) {
 }
 
 #[cfg(not(feature = "spectrum-scale"))]
-fn run_conditional(dir: &str, config: &Config) -> Result<Acc> {
+fn run_conditional(dir: &str, config: &Config) -> Result {
     crate::analysis::universal::run(dir, config)
 }
 
 #[cfg(feature = "spectrum-scale")]
-fn run_conditional(dir: &str, config: &Config) -> Result<Acc> {
+fn run_conditional(dir: &str, config: &Config) -> Result {
     if config.spectrum_scale {
         crate::analysis::spectrum_scale::run(dir, config)
     } else {

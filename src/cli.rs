@@ -4,7 +4,7 @@ use std::error::Error;
 use std::fs;
 use std::path::Path;
 
-use crate::output::Output;
+use stor_age::Output;
 
 pub fn build(color: bool) -> App<'static, 'static> {
     let color = if color {

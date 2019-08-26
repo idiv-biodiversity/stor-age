@@ -1,6 +1,6 @@
 use clap::{value_t, ArgMatches};
 
-use crate::output::Output;
+use crate::Output;
 
 #[derive(Clone)]
 pub struct Config {
