@@ -9,7 +9,7 @@ use std::process::Command;
 use tempfile::tempdir;
 
 #[test]
-fn skip_link_dir() -> Result<(), Box<Error>> {
+fn skip_link_dir() -> Result<(), Box<dyn Error>> {
     let dir = tempdir()?;
 
     let subdir = dir.path().join("subdir");
@@ -43,7 +43,7 @@ fn skip_link_dir() -> Result<(), Box<Error>> {
 }
 
 #[test]
-fn skip_link_file() -> Result<(), Box<Error>> {
+fn skip_link_file() -> Result<(), Box<dyn Error>> {
     let dir = tempdir()?;
 
     let path = dir.path().join("foo");

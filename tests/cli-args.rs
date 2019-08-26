@@ -5,7 +5,7 @@ use std::error::Error;
 use std::process::Command;
 
 #[test]
-fn arg_age_invalid() -> Result<(), Box<Error>> {
+fn arg_age_invalid() -> Result<(), Box<dyn Error>> {
     let mut cmd = Command::cargo_bin(crate_name!()).unwrap();
     cmd.arg("not-an-age");
 
@@ -17,7 +17,7 @@ fn arg_age_invalid() -> Result<(), Box<Error>> {
 }
 
 #[test]
-fn arg_dir_does_not_exist() -> Result<(), Box<Error>> {
+fn arg_dir_does_not_exist() -> Result<(), Box<dyn Error>> {
     let mut cmd = Command::cargo_bin(crate_name!()).unwrap();
     cmd.arg("90").arg("test/file/doesnt/exist");
 
@@ -29,7 +29,7 @@ fn arg_dir_does_not_exist() -> Result<(), Box<Error>> {
 }
 
 #[test]
-fn arg_dir_not_a_dir() -> Result<(), Box<Error>> {
+fn arg_dir_not_a_dir() -> Result<(), Box<dyn Error>> {
     let mut cmd = Command::cargo_bin(crate_name!()).unwrap();
     cmd.arg("90").arg("Cargo.toml");
 
@@ -42,7 +42,7 @@ fn arg_dir_not_a_dir() -> Result<(), Box<Error>> {
 
 #[cfg(target_family = "unix")]
 #[test]
-fn arg_dir_permission_denied() -> Result<(), Box<Error>> {
+fn arg_dir_permission_denied() -> Result<(), Box<dyn Error>> {
     let mut cmd = Command::cargo_bin(crate_name!()).unwrap();
     cmd.arg("90").arg("/root");
 
