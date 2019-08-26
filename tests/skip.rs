@@ -28,7 +28,7 @@ fn skip_link_dir() -> Result<(), Box<dyn Error>> {
     os::windows::fs::symlink_dir(subdir, &link)?;
 
     let mut cmd = Command::cargo_bin(crate_name!()).unwrap();
-    cmd.arg("--debug").arg("1").arg(dir.path());
+    cmd.arg("--debug").arg("1").arg("--").arg(dir.path());
 
     let skip_msg = format!("skipping: {:?}", link);
 
@@ -59,7 +59,7 @@ fn skip_link_file() -> Result<(), Box<dyn Error>> {
     os::windows::fs::symlink_file(path, &link)?;
 
     let mut cmd = Command::cargo_bin(crate_name!()).unwrap();
-    cmd.arg("--debug").arg("1").arg(dir.path());
+    cmd.arg("--debug").arg("1").arg("--").arg(dir.path());
 
     let skip_msg = format!("skipping: {:?}", link);
 

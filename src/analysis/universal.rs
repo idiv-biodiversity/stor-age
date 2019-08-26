@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::error::Error;
 use std::fs::{self, ReadDir};
 use std::io::ErrorKind;
@@ -12,8 +13,15 @@ use crate::Result;
 
 pub fn run(dir: &str, config: &Config) -> Result {
     let sys_time = SystemTime::now();
-    let age = Duration::from_secs(config.age_days * 3600 * 24);
-    let threshold = sys_time - age;
+
+    let mut thresholds = HashMap::with_capacity(config.ages_in_days.len());
+
+    for age in &config.ages_in_days {
+        let duration = Duration::from_secs(60 * 60 * 24 * age);
+        let threshold = sys_time - duration;
+
+        thresholds.insert(*age, threshold);
+    }
 
     let dev = if config.one_file_system {
         Some(fs::metadata(dir)?.dev())
@@ -21,23 +29,23 @@ pub fn run(dir: &str, config: &Config) -> Result {
         None
     };
 
-    walk(Path::new(dir), threshold, dev, config)
+    walk(Path::new(dir), &thresholds, dev, config)
 }
 
 fn walk(
     dir: &Path,
-    threshold: SystemTime,
+    thresholds: &HashMap<u64, SystemTime>,
     dev: Option<u64>,
     config: &Config,
 ) -> Result {
-    let sum = Acc::empty();
+    let acc = Acc::new();
 
     match fs::read_dir(dir) {
-        Ok(entries) => iterate(entries, sum, threshold, dev, config),
+        Ok(entries) => iterate(entries, acc, thresholds, dev, config),
 
         Err(ref error) if error.kind() == ErrorKind::PermissionDenied => {
             log::info(format!("skipping: {:?}: {}", dir, error.description()));
-            Ok(sum)
+            Ok(acc)
         }
 
         Err(error) => Err(error.into()),
@@ -46,8 +54,8 @@ fn walk(
 
 fn iterate(
     entries: ReadDir,
-    mut sum: Acc,
-    threshold: SystemTime,
+    mut acc: Acc,
+    thresholds: &HashMap<u64, SystemTime>,
     dev: Option<u64>,
     config: &Config,
 ) -> Result {
@@ -65,16 +73,31 @@ fn iterate(
         } else if file_type.is_file() {
             log::debug(format!("visiting: {:?}", path), config);
 
-            let len = meta.len();
+            let bytes = meta.len();
 
-            let access = if meta.accessed()? < threshold { len } else { 0 };
-            let modify = if meta.modified()? < threshold { len } else { 0 };
+            let mut current = Acc::new().with_total(bytes);
 
-            sum += Acc::new(len, access, modify);
+            for (age, threshold) in thresholds {
+                let accessed = if meta.accessed()? < *threshold {
+                    bytes
+                } else {
+                    0
+                };
+
+                let modified = if meta.modified()? < *threshold {
+                    bytes
+                } else {
+                    0
+                };
+
+                current.insert(*age, accessed, modified);
+            }
+
+            acc += current;
         } else if file_type.is_dir() {
             log::debug(format!("descending: {:?}", path), config);
 
-            sum += walk(&path, threshold, dev, config)?;
+            acc += walk(&path, thresholds, dev, config)?;
         } else {
             log::debug(
                 format!(
@@ -86,7 +109,7 @@ fn iterate(
         }
     }
 
-    Ok(sum)
+    Ok(acc)
 }
 
 fn dev_check(dev: Option<u64>, meta: &fs::Metadata) -> bool {

@@ -59,14 +59,24 @@ pub fn run(dir: &str, config: &Config) -> Result {
 
     if ecode.success() {
         let total_f = tmp.path().join("stor-age.list.total");
-        let access_f = tmp.path().join("stor-age.list.access");
-        let modify_f = tmp.path().join("stor-age.list.modify");
-
         let tot_size = sum_bytes(&total_f)?;
-        let acc_size = sum_bytes(&access_f)?;
-        let mod_size = sum_bytes(&modify_f)?;
 
-        Ok(Acc::new(tot_size, acc_size, mod_size))
+        let mut acc = Acc::new().with_total(tot_size);
+
+        for age in &config.ages_in_days {
+            let access_file =
+                tmp.path().join(format!("stor-age.list.access_{}", age));
+
+            let modify_file =
+                tmp.path().join(format!("stor-age.list.modify_{}", age));
+
+            let acc_size = sum_bytes(&access_file)?;
+            let mod_size = sum_bytes(&modify_file)?;
+
+            acc.insert(*age, acc_size, mod_size);
+        }
+
+        Ok(acc)
     } else {
         Err(Error::new("mmapplypolicy was no success", ErrorKind::Io))
     }
@@ -75,21 +85,49 @@ pub fn run(dir: &str, config: &Config) -> Result {
 fn write_policy_file(file: &PathBuf, config: &Config) -> io::Result<()> {
     let mut file = File::create(file)?;
 
-    let content = format!(
+    let mut content = String::from(
         "
 define(access_age, (DAYS(CURRENT_TIMESTAMP) - DAYS(ACCESS_TIME)))
 define(modify_age, (DAYS(CURRENT_TIMESTAMP) - DAYS(MODIFICATION_TIME)))
 
 RULE EXTERNAL LIST 'total' EXEC ''
-RULE EXTERNAL LIST 'access' EXEC ''
-RULE EXTERNAL LIST 'modify' EXEC ''
-
-RULE 'TOTAL' LIST 'total' SHOW(VARCHAR(FILE_SIZE))
-RULE 'ACCESS' LIST 'access' SHOW(VARCHAR(FILE_SIZE)) WHERE (access_age > {})
-RULE 'MODIFY' LIST 'modify' SHOW(VARCHAR(FILE_SIZE)) WHERE (modify_age > {})
 ",
-        config.age_days, config.age_days
     );
+
+    for age in &config.ages_in_days {
+        content.push_str(&format!(
+            "
+RULE EXTERNAL LIST 'access_{}' EXEC ''
+RULE EXTERNAL LIST 'modify_{}' EXEC ''
+",
+            age, age
+        ));
+    }
+
+    content.push_str(
+        "
+RULE
+  LIST 'total'
+  SHOW(VARCHAR(FILE_SIZE))
+",
+    );
+
+    for age in &config.ages_in_days {
+        content.push_str(&format!(
+            "
+RULE
+  LIST 'access_{}'
+    SHOW(VARCHAR(FILE_SIZE))
+    WHERE (access_age > {})
+
+RULE
+  LIST 'modify_{}'
+    SHOW(VARCHAR(FILE_SIZE))
+    WHERE (modify_age > {})
+",
+            age, age, age, age
+        ));
+    }
 
     file.write_all(content.as_bytes())?;
 

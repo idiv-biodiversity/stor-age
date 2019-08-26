@@ -19,7 +19,7 @@ fn arg_age_invalid() -> Result<(), Box<dyn Error>> {
 #[test]
 fn arg_dir_does_not_exist() -> Result<(), Box<dyn Error>> {
     let mut cmd = Command::cargo_bin(crate_name!()).unwrap();
-    cmd.arg("90").arg("test/file/doesnt/exist");
+    cmd.arg("90").arg("--").arg("test/file/doesnt/exist");
 
     cmd.assert()
         .failure()
@@ -31,7 +31,7 @@ fn arg_dir_does_not_exist() -> Result<(), Box<dyn Error>> {
 #[test]
 fn arg_dir_not_a_dir() -> Result<(), Box<dyn Error>> {
     let mut cmd = Command::cargo_bin(crate_name!()).unwrap();
-    cmd.arg("90").arg("Cargo.toml");
+    cmd.arg("90").arg("--").arg("Cargo.toml");
 
     cmd.assert()
         .failure()
@@ -44,7 +44,7 @@ fn arg_dir_not_a_dir() -> Result<(), Box<dyn Error>> {
 #[test]
 fn arg_dir_permission_denied() -> Result<(), Box<dyn Error>> {
     let mut cmd = Command::cargo_bin(crate_name!()).unwrap();
-    cmd.arg("90").arg("/root");
+    cmd.arg("90").arg("--").arg("/root");
 
     cmd.assert()
         .failure()

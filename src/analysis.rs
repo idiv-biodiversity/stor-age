@@ -12,7 +12,7 @@ pub fn run(dir: &str, config: &Config) {
 
     match result {
         Ok(acc) => match config.output {
-            Output::Pretty => output::pretty(dir, acc, config.age_days),
+            Output::Pretty => output::pretty(dir, acc),
             Output::Oneline => output::oneline(dir, acc),
         },
 

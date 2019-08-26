@@ -26,7 +26,7 @@ Usage
 Show how much of your directories have been lying around unused:
 
 ```console
-$ stor-age 90 ~/media
+$ stor-age 90 -- ~/media
 /home/umcdev/media: 63.1 GiB
 unaccessed for 90 days: 90% (56.6 GiB)
 unmodified for 90 days: 99% (62.2 GiB)
@@ -35,8 +35,8 @@ unmodified for 90 days: 99% (62.2 GiB)
 Iterate over set of directories with find-like tools.
 
 ```bash
-find /data/ -mindepth 1 -maxdepth 1 -type d | stor-age 60
-fd  --max-depth 1 --type d . /data | stor-age 60
+find /data/ -mindepth 1 -maxdepth 1 -type d | stor-age 90 365
+fd  --max-depth 1 --type d . /data | stor-age 90 365
 ```
 
 See `--help` for more information on command-line usage.

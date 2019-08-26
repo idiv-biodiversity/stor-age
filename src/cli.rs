@@ -15,6 +15,7 @@ pub fn build(color: bool) -> App<'static, 'static> {
 
     let age = Arg::with_name("age")
         .help("threshold in days")
+        .multiple(true)
         .required(true)
         .validator(is_number);
 
@@ -32,6 +33,7 @@ pub fn build(color: bool) -> App<'static, 'static> {
  pipes that get their input from e.g. `find`.",
         )
         .multiple(true)
+        .last(true)
         .validator(is_dir);
 
     let format = Arg::with_name("format")
