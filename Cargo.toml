@@ -8,8 +8,8 @@ readme = "README.md"
 documentation = "https://github.com/idiv-biodiversity/stor-age"
 homepage = "https://github.com/idiv-biodiversity/stor-age"
 repository = "https://github.com/idiv-biodiversity/stor-age"
-keywords = ["storage", "age"]
-categories = ["command-line-utilities"]
+keywords = ["storage", "age", "spectrum-scale"]
+categories = ["command-line-utilities", "filesystem"]
 edition = "2018"
 
 [dependencies]
