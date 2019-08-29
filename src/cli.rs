@@ -81,7 +81,7 @@ pub fn build(color: bool) -> App<'static, 'static> {
  information, see `man mmapplypolicy`.",
             )
             .takes_value(true)
-            .value_name("nodes")
+            .value_name("all|mount|Node,...|NodeFile|NodeClass")
             .display_order(1),
         #[cfg(feature = "spectrum-scale")]
         Arg::with_name("spectrum-scale-g")
