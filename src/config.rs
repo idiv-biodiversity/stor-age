@@ -5,6 +5,7 @@ use crate::Output;
 #[derive(Clone)]
 pub struct Config {
     pub debug: bool,
+    pub progress: bool,
     pub ages_in_days: Vec<u64>,
     pub output: Output,
     pub one_file_system: bool,
@@ -32,8 +33,12 @@ impl Config {
 
         let output = value_t!(args, "format", Output).unwrap();
 
+        let debug = args.is_present("debug");
+        let progress = args.is_present("progress") || debug;
+
         Config {
-            debug: args.is_present("debug"),
+            debug,
+            progress,
             ages_in_days,
             output,
             one_file_system: args.is_present("one-file-system"),

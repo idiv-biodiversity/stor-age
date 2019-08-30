@@ -21,8 +21,16 @@ pub fn build(color: bool) -> App<'static, 'static> {
 
     let debug = Arg::with_name("debug")
         .long("debug")
-        .long_help("Adds very verbose output useful for debugging.")
+        .long_help(
+"Adds very verbose output useful for debugging. Implies `--progress`."
+        )
         .hidden_short_help(true)
+        .display_order(2);
+
+    let progress = Arg::with_name("progress")
+        .long("progress")
+        .help("show progress messages")
+        .long_help("Show progress message for each directory.")
         .display_order(2);
 
     let dir = Arg::with_name("dir")
@@ -125,6 +133,7 @@ pub fn build(color: bool) -> App<'static, 'static> {
         .arg(debug)
         .arg(format)
         .arg(one_fs)
+        .arg(progress)
         .args(&conditional_compilation_args)
 }
 

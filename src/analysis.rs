@@ -10,6 +10,8 @@ use crate::Config;
 use crate::Result;
 
 pub fn run(dir: &str, config: &Config) {
+    log::progress(format!("analyzing {}", dir), config);
+
     let result = run_conditional(dir, config);
 
     match result {
