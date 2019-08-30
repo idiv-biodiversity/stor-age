@@ -2,6 +2,8 @@
 mod spectrum_scale;
 mod universal;
 
+use std::error::Error;
+
 use crate::log;
 use crate::output::{self, Output};
 use crate::Config;
@@ -17,7 +19,7 @@ pub fn run(dir: &str, config: &Config) {
         },
 
         Err(error) => {
-            log::error(format!("skipping directory {}: {}", dir, error));
+            log::error(format!("skipping {}: {}", dir, error.description()));
         }
     }
 }

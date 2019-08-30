@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::error::Error;
 use std::fs::{self, ReadDir};
 use std::io::ErrorKind;
 use std::os::unix::fs::MetadataExt;
@@ -44,7 +43,7 @@ fn walk(
         Ok(entries) => iterate(entries, acc, thresholds, dev, config),
 
         Err(ref error) if error.kind() == ErrorKind::PermissionDenied => {
-            log::info(format!("skipping: {:?}: {}", dir, error.description()));
+            log::info(format!("skipping permission denied: {:?}", dir));
             Ok(acc)
         }
 
@@ -67,7 +66,7 @@ fn iterate(
 
         if config.one_file_system && dev_check(dev, &meta) {
             log::debug(
-                format!("skipping: {:?}: different file system", path),
+                format!("skipping different file system: {:?}", path),
                 config,
             );
         } else if file_type.is_file() {
@@ -101,7 +100,7 @@ fn iterate(
         } else {
             log::debug(
                 format!(
-                    "skipping: {:?}: neither regular file nor directory",
+                    "skipping neither regular file nor directory: {:?}",
                     path
                 ),
                 config,
