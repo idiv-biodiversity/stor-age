@@ -11,6 +11,7 @@ Table of Contents
 
 <!-- toc -->
 
+- [Motivation](#motivation)
 - [Usage](#usage)
 - [Installation](#installation)
   * [Arch Linux](#arch-linux)
@@ -18,6 +19,24 @@ Table of Contents
   * [from source](#from-source)
 
 <!-- tocstop -->
+
+
+Motivation
+----------
+
+The main motivation of this tool is to find out, for a given set of data
+directories, how much of the *storage capacity* is still in active use. This
+information can be used on data processing systems, like High-Performance
+Computing (HPC) clusters, to motivate users to migrate their unused data to
+long-term storage facilities.
+
+The file system metadata available for this analysis are the *access time* and
+the *modification time* of the files in the data directory. Using this metadata
+and given a set of *ages*, the percentage of accessed and modified capacity of
+the total can be calculated for each of these ages and directories. Doing this
+over time, a usage profile of the data directories can be created. Users can be
+shown, when their data on the system gets *stale* and should be migrated to a
+storage facility suited for long-term archival.
 
 
 Usage
