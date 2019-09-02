@@ -33,6 +33,14 @@ impl Acc {
         Default::default()
     }
 
+    pub fn with_ages(mut self, ages: &[u64]) -> Acc {
+        for age in ages {
+            self.insert(*age, 0, 0);
+        }
+
+        self
+    }
+
     pub fn with_total(mut self, total: u64) -> Acc {
         self.total = total;
         self

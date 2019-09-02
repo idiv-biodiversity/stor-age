@@ -38,7 +38,7 @@ fn walk(
     dev: Option<u64>,
     config: &Config,
 ) -> Result {
-    let acc = Acc::new();
+    let acc = Acc::new().with_ages(&config.ages_in_days);
 
     match fs::read_dir(dir) {
         Ok(entries) => iterate(entries, acc, thresholds, dev, config),

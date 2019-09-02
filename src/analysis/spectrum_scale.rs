@@ -61,7 +61,9 @@ pub fn run(dir: &str, config: &Config) -> Result {
         let total_f = tmp.path().join("stor-age.list.total");
         let tot_size = sum_bytes(&total_f)?;
 
-        let mut acc = Acc::new().with_total(tot_size);
+        let mut acc = Acc::new()
+            .with_ages(&config.ages_in_days)
+            .with_total(tot_size);
 
         for age in &config.ages_in_days {
             let access_file =
