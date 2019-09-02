@@ -78,13 +78,13 @@ fn iterate(
             let mut current = Acc::new().with_total(bytes);
 
             for (age, threshold) in thresholds {
-                let accessed = if meta.accessed()? < *threshold {
+                let accessed = if meta.accessed()? > *threshold {
                     bytes
                 } else {
                     0
                 };
 
-                let modified = if meta.modified()? < *threshold {
+                let modified = if meta.modified()? > *threshold {
                     bytes
                 } else {
                     0

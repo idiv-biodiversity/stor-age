@@ -118,12 +118,12 @@ RULE
 RULE
   LIST 'access_{}'
     SHOW(VARCHAR(FILE_SIZE))
-    WHERE (access_age > {})
+    WHERE (access_age < {})
 
 RULE
   LIST 'modify_{}'
     SHOW(VARCHAR(FILE_SIZE))
-    WHERE (modify_age > {})
+    WHERE (modify_age < {})
 ",
             age, age, age, age
         ));

@@ -32,8 +32,8 @@ pub fn pretty(dir: &str, acc: Acc) {
         let a_b = ByteSize(accessed).to_string_as(true);
         let m_b = ByteSize(modified).to_string_as(true);
 
-        println!("unaccessed for {} days: {}% ({})", age, a_p, a_b,);
-        println!("unmodified for {} days: {}% ({})", age, m_p, m_b,);
+        println!("accessed during last {} days: {}% ({})", age, a_p, a_b,);
+        println!("modified during last {} days: {}% ({})", age, m_p, m_b,);
     }
 }
 
