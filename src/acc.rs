@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::ops::AddAssign;
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 struct AccInternal {
     accessed: u64,
     modified: u64,
@@ -22,7 +22,7 @@ impl AddAssign for AccInternal {
     }
 }
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct Acc {
     total: u64,
     data: HashMap<u64, AccInternal>,
