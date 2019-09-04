@@ -24,14 +24,13 @@ pub fn build(color: bool) -> App<'static, 'static> {
         .long_help(
 "Adds very verbose output useful for debugging. Implies `--progress`."
         )
-        .hidden_short_help(true)
-        .display_order(2);
+        .hidden_short_help(true);
 
     let progress = Arg::with_name("progress")
         .long("progress")
         .help("show progress messages")
         .long_help("Show progress message for each directory.")
-        .display_order(2);
+        .display_order(3);
 
     let dir = Arg::with_name("dir")
         .help("input directories")
@@ -81,30 +80,28 @@ pub fn build(color: bool) -> App<'static, 'static> {
  documentation, only the super-user `root` may use the `mmapplypolicy` \
  command.",
             )
-            .display_order(1),
+            .display_order(2),
         #[cfg(feature = "spectrum-scale")]
         Arg::with_name("spectrum-scale-N")
             .long("spectrum-scale-N")
             .help("use for mmapplypolicy -N argument")
             .long_help(
 "Specify list of nodes to use with `mmapplypolicy -N`. For detailed \
- information, see `man mmapplypolicy`.",
+ information, see `man mmapplypolicy`. Implies `--spectrum-scale`.",
             )
             .takes_value(true)
-            .value_name("all|mount|Node,...|NodeFile|NodeClass")
-            .display_order(1),
+            .value_name("all|mount|Node,...|NodeFile|NodeClass"),
         #[cfg(feature = "spectrum-scale")]
         Arg::with_name("spectrum-scale-g")
             .long("spectrum-scale-g")
             .help("use for mmapplypolicy -g argument")
             .long_help(
 "Specify global work directory to use with `mmapplypolicy -g`. For detailed \
- information, see `man mmapplypolicy`.",
+ information, see `man mmapplypolicy`. Implies `--spectrum-scale`.",
             )
             .takes_value(true)
             .value_name("dir")
-            .validator(is_dir)
-            .display_order(1),
+            .validator(is_dir),
         #[cfg(feature = "spectrum-scale")]
         Arg::with_name("spectrum-scale-s")
             .long("spectrum-scale-s")
@@ -115,12 +112,12 @@ pub fn build(color: bool) -> App<'static, 'static> {
  before being processed by this tool. Defaults to the system temporary \
  directory. This might be too small for large directories, e.g. more than 30 \
  GiB are needed for a directory with 180 million files. For detailed \
- information about the `-s` argument, see `man mmapplypolicy`.",
+ information about the `-s` argument, see `man mmapplypolicy`. Implies \
+ `--spectrum-scale`.",
             )
             .takes_value(true)
             .value_name("dir")
-            .validator(is_dir)
-            .display_order(1),
+            .validator(is_dir),
     ];
 
     App::new(crate_name!())
