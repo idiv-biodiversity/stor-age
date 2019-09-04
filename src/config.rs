@@ -1,6 +1,41 @@
 use clap::{value_t, ArgMatches};
+use std::str::FromStr;
 
-use crate::Output;
+#[derive(Clone, Copy)]
+pub enum Output {
+    Oneline,
+    Prometheus,
+    #[cfg(feature = "table")]
+    Table,
+}
+
+impl Output {
+    pub fn variants<'a>() -> Vec<&'a str> {
+        vec![
+            "oneline",
+            "prometheus",
+            #[cfg(feature = "table")]
+            "table",
+        ]
+    }
+}
+
+impl FromStr for Output {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s = s.to_lowercase();
+        let s = s.as_str();
+
+        match s {
+            "oneline" => Ok(Output::Oneline),
+            "prometheus" => Ok(Output::Prometheus),
+            #[cfg(feature = "table")]
+            "table" => Ok(Output::Table),
+            _ => Err(String::from("invalid output")),
+        }
+    }
+}
 
 #[derive(Clone)]
 pub struct Config {

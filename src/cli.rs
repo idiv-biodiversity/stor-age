@@ -1,3 +1,4 @@
+use atty::Stream;
 use clap::{crate_description, crate_name, crate_version};
 use clap::{App, AppSettings, Arg};
 use std::error::Error;
@@ -6,8 +7,8 @@ use std::path::Path;
 
 use stor_age::Output;
 
-pub fn build(color: bool) -> App<'static, 'static> {
-    let color = if color {
+pub fn build() -> App<'static, 'static> {
+    let color = if atty::is(Stream::Stdout) {
         AppSettings::ColoredHelp
     } else {
         AppSettings::ColorNever
@@ -40,6 +41,7 @@ pub fn build(color: bool) -> App<'static, 'static> {
  pipes that get their input from e.g. `find`.",
         )
         .multiple(true)
+        .required(atty::is(Stream::Stdin))
         .last(true)
         .validator(is_dir);
 
@@ -47,15 +49,22 @@ pub fn build(color: bool) -> App<'static, 'static> {
         .long("format")
         .help("output format")
         .long_help(
-"Specify output format. Pretty is intended for human-readable interactive \
- use. Oneline is intended as machine-readable output that shows a colon \
- (\":\") separated list of total, unaccessed, and unmodified size in bytes, \
- followed by the directory.",
+"Specify output format of the report. `prometheus` uses the Prometheus' \
+ metric exposition format. `oneline` is intended as machine-readable output \
+ that shows a colon (\":\") separated list of age, total, accessed, and \
+ modified size in bytes, followed by the directory. `table` (cargo feature, \
+ enabled by default) shows a pretty-printed table."
         )
         .takes_value(true)
         .case_insensitive(true)
         .possible_values(&Output::variants())
-        .default_value("Pretty");
+        .display_order(1);
+
+    let format = if cfg!(feature = "table") {
+        format.default_value("table")
+    } else {
+        format.required(true)
+    };
 
     let one_fs = Arg::with_name("one-file-system")
         .short("x")

@@ -14,23 +14,32 @@ edition = "2018"
 
 [dependencies]
 atty = "^0.2"
-bytesize = "^1"
 
 [dependencies.bstr]
 version = "^0.2"
+optional = true
+
+[dependencies.bytesize]
+version = "^1"
 optional = true
 
 [dependencies.clap]
 version = "^2"
 features = ["wrap_help"]
 
+[dependencies.prettytable-rs]
+version = "^0.8"
+optional = true
+default_features = false
+
 [dependencies.tempfile]
 version = "^3"
 optional = true
 
 [features]
-default = []
+default = ["table"]
 spectrum-scale = ["bstr", "tempfile"]
+table = ["bytesize", "prettytable-rs"]
 
 [dev-dependencies]
 assert_cmd = "^0.11"

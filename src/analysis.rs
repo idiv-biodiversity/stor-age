@@ -2,27 +2,43 @@
 mod spectrum_scale;
 mod universal;
 
+use std::collections::HashMap;
 use std::error::Error;
 
 use crate::log;
-use crate::output::{self, Output};
+use crate::output;
 use crate::Config;
+use crate::Output;
 use crate::Result;
 
-pub fn run(dir: &str, config: &Config) {
-    log::progress(format!("analyzing {}", dir), config);
+pub fn run(dirs: Vec<&str>, config: &Config) {
+    let mut results = HashMap::new();
 
-    let result = run_conditional(dir, config);
+    for dir in dirs {
+        log::progress(format!("analyzing {}", dir), config);
 
-    match result {
-        Ok(acc) => match config.output {
-            Output::Pretty => output::pretty(dir, acc),
-            Output::Oneline => output::oneline(dir, acc),
-        },
+        let result = run_conditional(dir, config);
 
-        Err(error) => {
-            log::error(format!("skipping {}: {}", dir, error.description()));
+        match result {
+            Ok(acc) => {
+                results.insert(dir, acc);
+            }
+
+            Err(error) => {
+                log::error(format!(
+                    "skipping {}: {}",
+                    dir,
+                    error.description()
+                ));
+            }
         }
+    }
+
+    match config.output {
+        Output::Prometheus => output::prometheus(results),
+        Output::Oneline => output::oneline(results),
+        #[cfg(feature = "table")]
+        Output::Table => output::table(results),
     }
 }
 
