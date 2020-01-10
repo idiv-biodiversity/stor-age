@@ -1,9 +1,11 @@
 use std::collections::HashMap;
 use std::fs::{self, ReadDir};
 use std::io::ErrorKind;
-use std::os::unix::fs::MetadataExt;
 use std::path::Path;
 use std::time::{Duration, SystemTime};
+
+#[cfg(target_family = "unix")]
+use std::os::unix::fs::MetadataExt;
 
 use crate::log;
 use crate::Acc;
@@ -22,11 +24,15 @@ pub fn run(dir: &str, config: &Config) -> Result {
         thresholds.insert(*age, threshold);
     }
 
+    #[cfg(target_family = "unix")]
     let dev = if config.one_file_system {
         Some(fs::metadata(dir)?.dev())
     } else {
         None
     };
+
+    #[cfg(not(target_family = "unix"))]
+    let dev = None;
 
     walk(Path::new(dir), &thresholds, dev, config)
 }
@@ -64,7 +70,7 @@ fn iterate(
         let meta = entry.metadata()?;
         let file_type = meta.file_type();
 
-        if config.one_file_system && dev_check(dev, &meta) {
+        if dev_check(dev, &meta) {
             log::debug(
                 format!("skipping different file system: {:?}", path),
                 config,
@@ -111,6 +117,12 @@ fn iterate(
     Ok(acc)
 }
 
+#[cfg(target_family = "unix")]
 fn dev_check(dev: Option<u64>, meta: &fs::Metadata) -> bool {
     dev.map_or(false, |dev| dev != meta.dev())
+}
+
+#[cfg(not(target_family = "unix"))]
+fn dev_check(_dev: Option<u64>, _meta: &fs::Metadata) -> bool {
+    false
 }

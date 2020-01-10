@@ -66,17 +66,18 @@ pub fn build() -> App<'static, 'static> {
         format.required(true)
     };
 
-    let one_fs = Arg::with_name("one-file-system")
-        .short("x")
-        .long("one-file-system")
-        .help("do not cross file system boundaries")
-        .long_help(
+    let conditional_compilation_args: Vec<Arg> = vec![
+        #[cfg(target_family = "unix")]
+        Arg::with_name("one-file-system")
+            .short("x")
+            .long("one-file-system")
+            .help("do not cross file system boundaries")
+            .long_help(
 "Do not cross file system boundaries, i.e. skip files and directories on \
  different file systems than the directory being scanned."
-        )
-        .display_order(1);
+            )
+            .display_order(1),
 
-    let conditional_compilation_args: Vec<Arg> = vec![
         #[cfg(feature = "spectrum-scale")]
         Arg::with_name("spectrum-scale")
             .long("spectrum-scale")
@@ -141,7 +142,6 @@ pub fn build() -> App<'static, 'static> {
         .arg(dir)
         .arg(debug)
         .arg(format)
-        .arg(one_fs)
         .arg(progress)
         .args(&conditional_compilation_args)
 }

@@ -43,6 +43,8 @@ pub struct Config {
     pub progress: bool,
     pub ages_in_days: Vec<u64>,
     pub output: Output,
+
+    #[cfg(target_family = "unix")]
     pub one_file_system: bool,
 
     #[cfg(feature = "spectrum-scale")]
@@ -76,6 +78,8 @@ impl Config {
             progress,
             ages_in_days,
             output,
+
+            #[cfg(target_family = "unix")]
             one_file_system: args.is_present("one-file-system"),
 
             #[cfg(feature = "spectrum-scale")]
