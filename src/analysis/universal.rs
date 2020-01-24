@@ -42,7 +42,7 @@ fn walk(
     match fs::read_dir(dir) {
         Ok(entries) => iterate(entries, acc, thresholds, dev, config),
 
-        Err(ref error) if error.kind() == ErrorKind::PermissionDenied => {
+        Err(error) if error.kind() == ErrorKind::PermissionDenied => {
             log::info(format!("skipping permission denied: {:?}", dir));
             Ok(acc)
         }
