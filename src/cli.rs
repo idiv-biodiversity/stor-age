@@ -90,6 +90,7 @@ pub fn build() -> App<'static, 'static> {
  command.",
             )
             .display_order(2),
+
         #[cfg(feature = "spectrum-scale")]
         Arg::with_name("spectrum-scale-N")
             .long("spectrum-scale-N")
@@ -100,6 +101,7 @@ pub fn build() -> App<'static, 'static> {
             )
             .takes_value(true)
             .value_name("all|mount|Node,...|NodeFile|NodeClass"),
+
         #[cfg(feature = "spectrum-scale")]
         Arg::with_name("spectrum-scale-g")
             .long("spectrum-scale-g")
@@ -111,6 +113,7 @@ pub fn build() -> App<'static, 'static> {
             .takes_value(true)
             .value_name("dir")
             .validator(is_dir),
+
         #[cfg(feature = "spectrum-scale")]
         Arg::with_name("spectrum-scale-s")
             .long("spectrum-scale-s")
