@@ -65,7 +65,7 @@ impl Config {
         let ages_in_days = args.values_of("age").unwrap();
         let ages_in_days = ages_in_days.map(|age| age.parse().unwrap());
         let mut ages_in_days: Vec<u64> = ages_in_days.collect();
-        ages_in_days.sort();
+        ages_in_days.sort_unstable();
         ages_in_days.dedup();
 
         let output = value_t!(args, "format", Output).unwrap();

@@ -34,7 +34,7 @@ impl Display for Error {
 
 impl From<std::io::Error> for Error {
     fn from(error: std::io::Error) -> Self {
-        Error::new(error.description(), ErrorKind::Io)
+        Error::new(&error.to_string(), ErrorKind::Io)
     }
 }
 
