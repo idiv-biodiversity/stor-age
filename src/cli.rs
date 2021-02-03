@@ -1,7 +1,6 @@
 use atty::Stream;
 use clap::{crate_description, crate_name, crate_version};
 use clap::{App, AppSettings, Arg};
-use std::error::Error;
 use std::fs;
 use std::path::Path;
 
@@ -154,7 +153,7 @@ fn is_dir(s: String) -> Result<(), String> {
     } else if !path.is_dir() {
         Err(format!("is not a directory: {:?}", path))
     } else if let Err(error) = fs::read_dir(path) {
-        Err(error.description().to_string())
+        Err(error.to_string())
     } else {
         Ok(())
     }

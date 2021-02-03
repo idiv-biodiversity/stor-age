@@ -3,7 +3,6 @@ mod spectrum_scale;
 mod universal;
 
 use std::collections::HashMap;
-use std::error::Error;
 
 use crate::log;
 use crate::output;
@@ -25,11 +24,7 @@ pub fn run(dirs: Vec<&str>, config: &Config) {
             }
 
             Err(error) => {
-                log::error(format!(
-                    "skipping {}: {}",
-                    dir,
-                    error.description()
-                ));
+                log::error(format!("skipping {}: {}", dir, error));
             }
         }
     }
