@@ -48,7 +48,7 @@ fn arg_dir_permission_denied() -> Result<(), Box<dyn Error>> {
 
     cmd.assert()
         .failure()
-        .stderr(predicate::str::contains("permission denied"));
+        .stderr(predicate::str::is_match("[pP]ermission denied").unwrap());
 
     Ok(())
 }
