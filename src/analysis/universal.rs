@@ -7,12 +7,13 @@ use std::time::{Duration, SystemTime};
 #[cfg(target_family = "unix")]
 use std::os::unix::fs::MetadataExt;
 
+use anyhow::Result;
+
 use crate::log;
 use crate::Acc;
 use crate::Config;
-use crate::Result;
 
-pub fn run(dir: &str, config: &Config) -> Result {
+pub fn run(dir: &str, config: &Config) -> Result<Acc> {
     let sys_time = SystemTime::now();
 
     let mut thresholds = HashMap::with_capacity(config.ages_in_days.len());
@@ -42,7 +43,7 @@ fn walk(
     thresholds: &HashMap<u64, SystemTime>,
     dev: Option<u64>,
     config: &Config,
-) -> Result {
+) -> Result<Acc> {
     let acc = Acc::new().with_ages(&config.ages_in_days);
 
     match fs::read_dir(dir) {
@@ -63,7 +64,7 @@ fn iterate(
     thresholds: &HashMap<u64, SystemTime>,
     dev: Option<u64>,
     config: &Config,
-) -> Result {
+) -> Result<Acc> {
     for entry in entries {
         let entry = entry?;
         let path = entry.path();
