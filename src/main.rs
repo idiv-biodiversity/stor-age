@@ -2,9 +2,10 @@ mod cli;
 
 use std::io::{self, Read};
 
+use anyhow::{Context, Result};
 use stor_age::Config;
 
-fn main() {
+fn main() -> Result<()> {
     let args = cli::build().get_matches();
     let config = Config::from_args(&args);
 
@@ -15,11 +16,13 @@ fn main() {
 
             io::stdin()
                 .read_to_string(&mut dirs)
-                .expect("error reading from stdin");
+                .with_context(|| "error reading from stdin")?;
 
             let dirs = dirs.lines().collect();
 
             stor_age::run(dirs, &config);
         }
     }
+
+    Ok(())
 }
