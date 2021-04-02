@@ -1,24 +1,24 @@
+use std::fs::File;
+use std::io::{BufReader, Write};
+use std::path::Path;
+use std::process::{Command, Stdio};
+
+use anyhow::{anyhow, Result};
 use bstr::io::BufReadExt;
 use bstr::ByteSlice;
-use std::fs::File;
-use std::io::{self, BufReader, Write};
-use std::path::{Path, PathBuf};
-use std::process::{Command, Stdio};
 use tempfile::{tempdir, tempdir_in};
 
 use crate::log;
-use crate::Acc;
 use crate::Config;
-use crate::{Error, ErrorKind, Result};
+use crate::Data;
 
-pub fn run(dir: &str, config: &Config) -> Result {
-    let tmp = if let Some(ref local_work_dir) =
-        config.spectrum_scale_local_work_dir
-    {
-        tempdir_in(local_work_dir)?
-    } else {
-        tempdir()?
-    };
+pub fn run(dir: &str, config: &Config) -> Result<Data> {
+    let tmp =
+        if let Some(local_work_dir) = &config.spectrum_scale_local_work_dir {
+            tempdir_in(local_work_dir)?
+        } else {
+            tempdir()?
+        };
 
     let policy = tmp.path().join(".policy");
     let prefix = tmp.path().join("stor-age");
@@ -34,15 +34,15 @@ pub fn run(dir: &str, config: &Config) -> Result {
         .args(&["-I", "defer"])
         .args(&["-L", "0"]);
 
-    if let Some(ref nodes) = config.spectrum_scale_nodes {
+    if let Some(nodes) = &config.spectrum_scale_nodes {
         command.args(&["-N", nodes]);
     };
 
-    if let Some(ref local_work_dir) = config.spectrum_scale_local_work_dir {
+    if let Some(local_work_dir) = &config.spectrum_scale_local_work_dir {
         command.args(&["-s", local_work_dir]);
     };
 
-    if let Some(ref global_work_dir) = config.spectrum_scale_global_work_dir {
+    if let Some(global_work_dir) = &config.spectrum_scale_global_work_dir {
         command.args(&["-g", global_work_dir]);
     };
 
@@ -58,12 +58,13 @@ pub fn run(dir: &str, config: &Config) -> Result {
     let ecode = child.wait().expect("failed waiting on mmapplypolicy");
 
     if ecode.success() {
-        let total_f = tmp.path().join("stor-age.list.total");
-        let tot_size = sum_bytes(&total_f)?;
+        let total_file = tmp.path().join("stor-age.list.total");
+        let (tot_bytes, tot_files) = sum(&total_file)?;
 
-        let mut acc = Acc::new()
+        let mut data = Data::default()
             .with_ages(&config.ages_in_days)
-            .with_total(tot_size);
+            .with_total_bytes(tot_bytes)
+            .with_total_bytes(tot_files);
 
         for age in &config.ages_in_days {
             let access_file =
@@ -72,19 +73,19 @@ pub fn run(dir: &str, config: &Config) -> Result {
             let modify_file =
                 tmp.path().join(format!("stor-age.list.modify_{}", age));
 
-            let acc_size = sum_bytes(&access_file)?;
-            let mod_size = sum_bytes(&modify_file)?;
+            let (a_b, a_f) = sum(&access_file)?;
+            let (m_b, m_f) = sum(&modify_file)?;
 
-            acc.insert(*age, acc_size, mod_size);
+            data.insert(*age, a_b, m_b, a_f, m_f);
         }
 
-        Ok(acc)
+        Ok(data)
     } else {
-        Err(Error::new("mmapplypolicy was no success", ErrorKind::Io))
+        Err(anyhow!("mmapplypolicy was no success"))
     }
 }
 
-fn write_policy_file(file: &PathBuf, config: &Config) -> io::Result<()> {
+fn write_policy_file(file: &Path, config: &Config) -> Result<()> {
     let mut file = File::create(file)?;
 
     let mut content = String::from(
@@ -136,8 +137,9 @@ RULE
     Ok(())
 }
 
-fn sum_bytes(file: &Path) -> io::Result<u64> {
-    let mut sum = 0;
+fn sum(file: &Path) -> Result<(u64, u64)> {
+    let mut sum_bytes = 0;
+    let mut sum_files = 0;
 
     if file.exists() {
         let file = File::open(file)?;
@@ -150,9 +152,10 @@ fn sum_bytes(file: &Path) -> io::Result<u64> {
             let size = size.to_str().unwrap();
             let size: u64 = size.parse().unwrap();
 
-            sum += size;
+            sum_bytes += size;
+            sum_files += 1;
         }
     }
 
-    Ok(sum)
+    Ok((sum_bytes, sum_files))
 }

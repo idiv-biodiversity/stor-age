@@ -48,11 +48,12 @@ pub fn build() -> App<'static, 'static> {
         .long("format")
         .help("output format")
         .long_help(
-"Specify output format of the report. `prometheus` uses the Prometheus' \
+"Specify output format of the report. `prometheus` uses the Prometheus \
  metric exposition format. `oneline` is intended as machine-readable output \
  that shows a colon (\":\") separated list of age, total, accessed, and \
- modified size in bytes, followed by the directory. `table` (cargo feature, \
- enabled by default) shows a pretty-printed table."
+ modified size in bytes, total, accessed, and modified number of files, \
+ followed by the directory. `table` (cargo feature, enabled by default) shows \
+ a pretty-printed table."
         )
         .takes_value(true)
         .case_insensitive(true)
