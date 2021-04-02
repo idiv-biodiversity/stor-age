@@ -32,10 +32,10 @@ pub fn run(dirs: Vec<&str>, config: &Config) {
     }
 
     match config.output {
-        Output::Prometheus => output::prometheus(results),
-        Output::Oneline => output::oneline(results),
+        Output::Prometheus => output::prometheus(&results),
+        Output::Oneline => output::oneline(&results),
         #[cfg(feature = "table")]
-        Output::Table => output::table(results),
+        Output::Table => output::table(&results),
     }
 }
 

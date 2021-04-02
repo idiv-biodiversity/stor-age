@@ -1,5 +1,6 @@
-use clap::{value_t, ArgMatches};
 use std::str::FromStr;
+
+use clap::{value_t, ArgMatches};
 
 #[derive(Clone, Copy)]
 pub enum Output {
@@ -10,6 +11,7 @@ pub enum Output {
 }
 
 impl Output {
+    #[must_use]
     pub fn variants<'a>() -> Vec<&'a str> {
         vec![
             "oneline",
@@ -28,15 +30,16 @@ impl FromStr for Output {
         let s = s.as_str();
 
         match s {
-            "oneline" => Ok(Output::Oneline),
-            "prometheus" => Ok(Output::Prometheus),
+            "oneline" => Ok(Self::Oneline),
+            "prometheus" => Ok(Self::Prometheus),
             #[cfg(feature = "table")]
-            "table" => Ok(Output::Table),
+            "table" => Ok(Self::Table),
             _ => Err(String::from("invalid output")),
         }
     }
 }
 
+#[allow(clippy::struct_excessive_bools)]
 #[derive(Clone)]
 pub struct Config {
     pub debug: bool,
@@ -61,7 +64,13 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn from_args(args: &ArgMatches) -> Config {
+    /// Returns configuration from `clap` arguments.
+    ///
+    /// # Panics
+    ///
+    /// Panics if required arguments are not present.
+    #[must_use]
+    pub fn from_args(args: &ArgMatches) -> Self {
         let ages_in_days = args.values_of("age").unwrap();
         let ages_in_days = ages_in_days.map(|age| age.parse().unwrap());
         let mut ages_in_days: Vec<u64> = ages_in_days.collect();
@@ -73,7 +82,7 @@ impl Config {
         let debug = args.is_present("debug");
         let progress = args.is_present("progress") || debug;
 
-        Config {
+        Self {
             debug,
             progress,
             ages_in_days,
