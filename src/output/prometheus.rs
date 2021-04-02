@@ -2,10 +2,10 @@ use std::collections::HashMap;
 
 use crate::Data;
 
-pub fn show(data: HashMap<&str, Data>) {
-    show_bytes(&data);
+pub fn show(data: &HashMap<&str, Data>) {
+    show_bytes(data);
     println!();
-    show_files(&data);
+    show_files(data);
 }
 
 fn show_bytes(data: &HashMap<&str, Data>) {

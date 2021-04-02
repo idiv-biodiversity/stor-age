@@ -1,14 +1,17 @@
+#![deny(clippy::all)]
+#![warn(clippy::pedantic, clippy::nursery, clippy::cargo)]
+
 mod analysis;
 mod config;
 pub mod log;
 mod output;
 
+use std::collections::HashMap;
+use std::ops::AddAssign;
+
 pub use analysis::run;
 pub use config::Config;
 pub use config::Output;
-
-use std::collections::HashMap;
-use std::ops::AddAssign;
 
 #[derive(Debug, Default)]
 struct Count {
@@ -37,6 +40,7 @@ pub struct Data {
 }
 
 impl Data {
+    #[must_use]
     pub fn with_ages(mut self, ages: &[u64]) -> Self {
         for age in ages {
             self.insert(*age, 0, 0, 0, 0);
@@ -45,40 +49,49 @@ impl Data {
         self
     }
 
-    pub fn with_total_bytes(mut self, bytes: u64) -> Self {
+    #[must_use]
+    pub const fn with_total_bytes(mut self, bytes: u64) -> Self {
         self.total_bytes = bytes;
         self
     }
 
-    pub fn with_total_files(mut self, files: u64) -> Self {
+    #[must_use]
+    pub const fn with_total_files(mut self, files: u64) -> Self {
         self.total_files = files;
         self
     }
 
+    #[must_use]
     pub fn get_accessed_bytes(&self, age: u64) -> Option<u64> {
         self.data.get(&age).map(|data| data.accessed_bytes)
     }
 
+    #[must_use]
     pub fn get_modified_bytes(&self, age: u64) -> Option<u64> {
         self.data.get(&age).map(|data| data.modified_bytes)
     }
 
+    #[must_use]
     pub fn get_accessed_files(&self, age: u64) -> Option<u64> {
         self.data.get(&age).map(|data| data.accessed_files)
     }
 
+    #[must_use]
     pub fn get_modified_files(&self, age: u64) -> Option<u64> {
         self.data.get(&age).map(|data| data.modified_files)
     }
 
-    pub fn get_total_bytes(&self) -> u64 {
+    #[must_use]
+    pub const fn get_total_bytes(&self) -> u64 {
         self.total_bytes
     }
 
-    pub fn get_total_files(&self) -> u64 {
+    #[must_use]
+    pub const fn get_total_files(&self) -> u64 {
         self.total_files
     }
 
+    #[must_use]
     pub fn get_ages(&self) -> Vec<&u64> {
         let mut ages: Vec<&u64> = self.data.keys().collect();
         ages.sort();

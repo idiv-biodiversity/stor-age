@@ -17,7 +17,7 @@ matrix:
         - rustup component add clippy
         - rustup component add rustfmt
       script:
-        - cargo clippy --all-features -- -D warnings
+        - cargo clippy --all-features --tests
         - cargo fmt -- --check
         - cargo test --all-features --verbose
   allow_failures:

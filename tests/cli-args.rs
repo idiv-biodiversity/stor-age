@@ -1,8 +1,9 @@
+use std::error::Error;
+use std::process::Command;
+
 use assert_cmd::crate_name;
 use assert_cmd::prelude::*;
 use predicates::prelude::*;
-use std::error::Error;
-use std::process::Command;
 
 #[test]
 fn arg_age_invalid() -> Result<(), Box<dyn Error>> {

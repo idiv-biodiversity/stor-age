@@ -2,8 +2,8 @@ use std::collections::HashMap;
 
 use crate::Data;
 
-pub fn show(data: HashMap<&str, Data>) {
-    for (dir, data) in &data {
+pub fn show(data: &HashMap<&str, Data>) {
+    for (dir, data) in data {
         let t_b = data.get_total_bytes();
         let t_f = data.get_total_files();
 

@@ -1,11 +1,12 @@
-use assert_cmd::crate_name;
-use assert_cmd::prelude::*;
-use predicates::prelude::*;
 use std::error::Error;
 use std::fs::{self, File};
 use std::io::Write;
 use std::os;
 use std::process::Command;
+
+use assert_cmd::crate_name;
+use assert_cmd::prelude::*;
+use predicates::prelude::*;
 use tempfile::tempdir;
 
 #[test]

@@ -1,8 +1,9 @@
+use std::fs;
+use std::path::Path;
+
 use atty::Stream;
 use clap::{crate_description, crate_name, crate_version};
 use clap::{App, AppSettings, Arg};
-use std::fs;
-use std::path::Path;
 
 use stor_age::Output;
 
@@ -66,7 +67,21 @@ pub fn build() -> App<'static, 'static> {
         format.required(true)
     };
 
-    let conditional_compilation_args: Vec<Arg> = vec![
+    App::new(crate_name!())
+        .version(crate_version!())
+        .about(crate_description!())
+        .global_setting(color)
+        .help_short("?")
+        .arg(age)
+        .arg(dir)
+        .arg(debug)
+        .arg(format)
+        .arg(progress)
+        .args(&conditional_compilation_args())
+}
+
+fn conditional_compilation_args<'a, 'b>() -> Vec<Arg<'a, 'b>> {
+    vec![
         #[cfg(target_family = "unix")]
         Arg::with_name("one-file-system")
             .short("x")
@@ -131,21 +146,10 @@ pub fn build() -> App<'static, 'static> {
             .takes_value(true)
             .value_name("dir")
             .validator(is_dir),
-    ];
-
-    App::new(crate_name!())
-        .version(crate_version!())
-        .about(crate_description!())
-        .global_setting(color)
-        .help_short("?")
-        .arg(age)
-        .arg(dir)
-        .arg(debug)
-        .arg(format)
-        .arg(progress)
-        .args(&conditional_compilation_args)
+    ]
 }
 
+#[allow(clippy::needless_pass_by_value)]
 fn is_dir(s: String) -> Result<(), String> {
     let path = Path::new(&s);
 
@@ -160,6 +164,7 @@ fn is_dir(s: String) -> Result<(), String> {
     }
 }
 
+#[allow(clippy::needless_pass_by_value)]
 fn is_number(s: String) -> Result<(), String> {
     if s.parse::<u64>().is_ok() {
         Ok(())
