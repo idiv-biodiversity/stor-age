@@ -10,20 +10,11 @@ use std::os::unix::fs::MetadataExt;
 use anyhow::Result;
 
 use crate::log;
-use crate::Acc;
 use crate::Config;
+use crate::Data;
 
-pub fn run(dir: &str, config: &Config) -> Result<Acc> {
-    let sys_time = SystemTime::now();
-
-    let mut thresholds = HashMap::with_capacity(config.ages_in_days.len());
-
-    for age in &config.ages_in_days {
-        let duration = Duration::from_secs(60 * 60 * 24 * age);
-        let threshold = sys_time - duration;
-
-        thresholds.insert(*age, threshold);
-    }
+pub fn run(dir: &str, config: &Config) -> Result<Data> {
+    let thresholds = thresholds(&config.ages_in_days);
 
     #[cfg(target_family = "unix")]
     let dev = if config.one_file_system {
@@ -38,20 +29,35 @@ pub fn run(dir: &str, config: &Config) -> Result<Acc> {
     walk(Path::new(dir), &thresholds, dev, config)
 }
 
+fn thresholds(ages_in_days: &[u64]) -> HashMap<u64, SystemTime> {
+    let now = SystemTime::now();
+
+    let mut thresholds = HashMap::with_capacity(ages_in_days.len());
+
+    for age in ages_in_days {
+        let duration = Duration::from_secs(60 * 60 * 24 * age);
+        let threshold = now - duration;
+
+        thresholds.insert(*age, threshold);
+    }
+
+    thresholds
+}
+
 fn walk(
     dir: &Path,
     thresholds: &HashMap<u64, SystemTime>,
     dev: Option<u64>,
     config: &Config,
-) -> Result<Acc> {
-    let acc = Acc::new().with_ages(&config.ages_in_days);
+) -> Result<Data> {
+    let data = Data::default().with_ages(&config.ages_in_days);
 
     match fs::read_dir(dir) {
-        Ok(entries) => iterate(entries, acc, thresholds, dev, config),
+        Ok(entries) => iterate(entries, data, thresholds, dev, config),
 
         Err(error) if error.kind() == ErrorKind::PermissionDenied => {
             log::info(format!("skipping permission denied: {:?}", dir));
-            Ok(acc)
+            Ok(data)
         }
 
         Err(error) => Err(error.into()),
@@ -60,11 +66,11 @@ fn walk(
 
 fn iterate(
     entries: ReadDir,
-    mut acc: Acc,
+    mut data: Data,
     thresholds: &HashMap<u64, SystemTime>,
     dev: Option<u64>,
     config: &Config,
-) -> Result<Acc> {
+) -> Result<Data> {
     for entry in entries {
         let entry = entry?;
         let path = entry.path();
@@ -81,29 +87,30 @@ fn iterate(
 
             let bytes = meta.len();
 
-            let mut current = Acc::new().with_total(bytes);
+            let mut current =
+                Data::default().with_total_bytes(bytes).with_total_files(1);
 
             for (age, threshold) in thresholds {
-                let accessed = if meta.accessed()? > *threshold {
-                    bytes
+                let (a_b, a_f) = if meta.accessed()? > *threshold {
+                    (bytes, 1)
                 } else {
-                    0
+                    (0, 0)
                 };
 
-                let modified = if meta.modified()? > *threshold {
-                    bytes
+                let (m_b, m_f) = if meta.modified()? > *threshold {
+                    (bytes, 1)
                 } else {
-                    0
+                    (0, 0)
                 };
 
-                current.insert(*age, accessed, modified);
+                current.insert(*age, a_b, m_b, a_f, m_f);
             }
 
-            acc += current;
+            data += current;
         } else if file_type.is_dir() {
             log::debug(format!("descending: {:?}", path), config);
 
-            acc += walk(&path, thresholds, dev, config)?;
+            data += walk(&path, thresholds, dev, config)?;
         } else {
             log::debug(
                 format!(
@@ -115,7 +122,7 @@ fn iterate(
         }
     }
 
-    Ok(acc)
+    Ok(data)
 }
 
 #[cfg(target_family = "unix")]

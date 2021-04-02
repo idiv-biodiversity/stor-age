@@ -8,8 +8,8 @@ use anyhow::Result;
 
 use crate::log;
 use crate::output;
-use crate::Acc;
 use crate::Config;
+use crate::Data;
 use crate::Output;
 
 pub fn run(dirs: Vec<&str>, config: &Config) {
@@ -40,12 +40,12 @@ pub fn run(dirs: Vec<&str>, config: &Config) {
 }
 
 #[cfg(not(feature = "spectrum-scale"))]
-fn run_conditional(dir: &str, config: &Config) -> Result<Acc> {
+fn run_conditional(dir: &str, config: &Config) -> Result<Data> {
     crate::analysis::universal::run(dir, config)
 }
 
 #[cfg(feature = "spectrum-scale")]
-fn run_conditional(dir: &str, config: &Config) -> Result<Acc> {
+fn run_conditional(dir: &str, config: &Config) -> Result<Data> {
     if config.spectrum_scale {
         crate::analysis::spectrum_scale::run(dir, config)
     } else {
