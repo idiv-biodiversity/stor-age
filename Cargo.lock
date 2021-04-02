@@ -416,6 +416,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "smooth"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "455f1ef596f9ea938a71ea5615bcd6be4148ea10e8892e665de6d70936b40248"
+
+[[package]]
 name = "stor-age"
 version = "0.5.0"
 dependencies = [
@@ -427,6 +433,7 @@ dependencies = [
  "clap",
  "predicates",
  "prettytable-rs",
+ "smooth",
  "tempfile",
 ]
 

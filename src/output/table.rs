@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use bytesize::ByteSize;
 use prettytable::{cell, format::FormatBuilder, Row, Table};
+use smooth::Smooth;
 
 use crate::Data;
 
@@ -100,10 +101,10 @@ fn percentage(total: u64, accessed: u64, modified: u64) -> (f64, f64) {
         (0.0, 0.0)
     } else {
         let accessed_percentage =
-            ((accessed as f64) / (total as f64) * 10000.0).round() / 100.0;
+            ((accessed as f64) / (total as f64) * 100.0).round_to(2);
 
         let modified_percentage =
-            ((modified as f64) / (total as f64) * 10000.0).round() / 100.0;
+            ((modified as f64) / (total as f64) * 100.0).round_to(2);
 
         (accessed_percentage, modified_percentage)
     }
