@@ -3,8 +3,6 @@ use std::collections::HashMap;
 use crate::Acc;
 
 pub fn show(data: HashMap<&str, Acc>) {
-    dbg!(&data);
-
     for (dir, acc) in &data {
         let total = acc.get_total_bytes();
 
