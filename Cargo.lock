@@ -423,7 +423,7 @@ checksum = "455f1ef596f9ea938a71ea5615bcd6be4148ea10e8892e665de6d70936b40248"
 
 [[package]]
 name = "stor-age"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
