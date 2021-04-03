@@ -51,12 +51,11 @@ Show how much of your directories have been lying around unused:
 ```console
 $ stor-age 90 365 -- ~/media/pics ~/projects
 
-Directory             Total     Age Accessed  Percent Modified  Percent
-/home/user/media/pics 222.9 MiB  90 715.0 kiB   0.31% 382.5 kiB   0.17%
-                                365   7.4 MiB    3.3%   1.1 MiB    0.5%
-/home/user/projects     4.0 GiB  90   3.4 GiB  84.78%   2.5 GiB  62.79%
-                                365   3.7 GiB  92.64%   2.7 GiB  66.94%
-
+Directory             Age Bytes     Accessed  Percent Modified  Percent Files Accessed Percent Modified Percent
+/home/user/projects    90   5.8 GiB   5.7 GiB   97.8%   5.6 GiB  95.12% 72596    71582   98.6%    39914  54.98%
+                      365             5.8 GiB  98.85%   5.6 GiB  96.38%          71981  99.15%    48734  67.13%
+/home/user/media/pics  90 483.2 MiB 107.0 MiB  22.15% 488.7 kiB    0.1%  2299      328  14.27%        7    0.3%
+                      365           219.1 MiB  45.35%   3.0 MiB   0.63%           2119  92.17%       13   0.57%
 ```
 
 **Note:** The two dashes `--` are *required* because you can supply both
@@ -75,29 +74,53 @@ find /data/ -mindepth 1 -maxdepth 1 -type d |
 The output is in valid [Prometheus][] metric exposition format:
 
 ```
-# HELP stor_age_bytes_total Total size.
+# HELP stor_age_bytes_total Total size in bytes.
 # TYPE stor_age_bytes_total gauge
-stor_age_bytes_total{dir="/data/foo"} 6564000342
-stor_age_bytes_total{dir="/data/bar"} 4453853339
-stor_age_bytes_total{dir="/data/baz"} 1229901478
+stor_age_bytes_total{dir="/data/foo"} 132904506033
+stor_age_bytes_total{dir="/data/bar"} 52451763095
+stor_age_bytes_total{dir="/data/baz"} 38525158426
 
-# HELP stor_age_bytes_accessed Accessed size.
+# HELP stor_age_bytes_accessed Accessed size in bytes.
 # TYPE stor_age_bytes_accessed gauge
-stor_age_bytes_accessed{dir="/data/foo",age="90"} 5887683522
-stor_age_bytes_accessed{dir="/data/foo",age="365"} 6496950716
-stor_age_bytes_accessed{dir="/data/bar",age="90"} 3728333714
-stor_age_bytes_accessed{dir="/data/bar",age="365"} 4269130140
-stor_age_bytes_accessed{dir="/data/baz",age="90"} 1229849194
-stor_age_bytes_accessed{dir="/data/baz",age="365"} 1229896439
+stor_age_bytes_accessed{dir="/data/foo",age="90"} 770700907
+stor_age_bytes_accessed{dir="/data/foo",age="365"} 8013210318
+stor_age_bytes_accessed{dir="/data/bar",age="90"} 1003231299
+stor_age_bytes_accessed{dir="/data/bar",age="365"} 27936338982
+stor_age_bytes_accessed{dir="/data/baz",age="90"} 4534759665
+stor_age_bytes_accessed{dir="/data/baz",age="365"} 38525158426
 
-# HELP stor_age_bytes_modified Modified size.
+# HELP stor_age_bytes_modified Modified size in bytes.
 # TYPE stor_age_bytes_modified gauge
-stor_age_bytes_modified{dir="/data/foo",age="90"} 5607932802
-stor_age_bytes_modified{dir="/data/foo",age="365"} 6432800333
-stor_age_bytes_modified{dir="/data/bar",age="90"} 1506205504
-stor_age_bytes_modified{dir="/data/bar",age="365"} 4228829760
-stor_age_bytes_modified{dir="/data/baz",age="90"} 976617687
-stor_age_bytes_modified{dir="/data/baz",age="365"} 1162918704
+stor_age_bytes_modified{dir="/data/foo",age="90"} 3309
+stor_age_bytes_modified{dir="/data/foo",age="365"} 8013127399
+stor_age_bytes_modified{dir="/data/bar",age="90"} 964846566
+stor_age_bytes_modified{dir="/data/bar",age="365"} 4738171482
+stor_age_bytes_modified{dir="/data/baz",age="90"} 3641814237
+stor_age_bytes_modified{dir="/data/baz",age="365"} 13704189585
+
+# HELP stor_age_files_total Total number of files.
+# TYPE stor_age_files_total gauge
+stor_age_files_total{dir="/data/foo"} 1913
+stor_age_files_total{dir="/data/bar"} 1516
+stor_age_files_total{dir="/data/baz"} 2023
+
+# HELP stor_age_files_accessed Accessed number of files.
+# TYPE stor_age_files_accessed gauge
+stor_age_files_accessed{dir="/data/foo",age="90"} 11
+stor_age_files_accessed{dir="/data/foo",age="365"} 262
+stor_age_files_accessed{dir="/data/bar",age="90"} 553
+stor_age_files_accessed{dir="/data/bar",age="365"} 1402
+stor_age_files_accessed{dir="/data/baz",age="90"} 711
+stor_age_files_accessed{dir="/data/baz",age="365"} 2023
+
+# HELP stor_age_files_modified Modified number of files.
+# TYPE stor_age_files_modified gauge
+stor_age_files_modified{dir="/data/foo",age="90"} 2
+stor_age_files_modified{dir="/data/foo",age="365"} 250
+stor_age_files_modified{dir="/data/bar",age="90"} 553
+stor_age_files_modified{dir="/data/bar",age="365"} 1339
+stor_age_files_modified{dir="/data/baz",age="90"} 558
+stor_age_files_modified{dir="/data/baz",age="365"} 1894
 ```
 
 
