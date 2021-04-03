@@ -64,7 +64,7 @@ pub fn run(dir: &str, config: &Config) -> Result<Data> {
         let mut data = Data::default()
             .with_ages(&config.ages_in_days)
             .with_total_bytes(tot_bytes)
-            .with_total_bytes(tot_files);
+            .with_total_files(tot_files);
 
         for age in &config.ages_in_days {
             let access_file =
