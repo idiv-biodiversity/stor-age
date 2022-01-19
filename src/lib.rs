@@ -124,7 +124,7 @@ impl AddAssign for Data {
 
         for (age, acc) in other.data {
             let sum = self.data.entry(age).or_default();
-            *sum += acc
+            *sum += acc;
         }
     }
 }

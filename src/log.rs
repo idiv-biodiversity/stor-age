@@ -4,13 +4,13 @@ use crate::Config;
 
 pub fn debug<S: AsRef<str>>(message: S, config: &Config) {
     if config.debug {
-        eprintln!("{}: {}", crate_name!(), message.as_ref())
+        eprintln!("{}: {}", crate_name!(), message.as_ref());
     }
 }
 
 pub fn progress<S: AsRef<str>>(message: S, config: &Config) {
     if config.progress {
-        eprintln!("{}: {}", crate_name!(), message.as_ref())
+        eprintln!("{}: {}", crate_name!(), message.as_ref());
     }
 }
 

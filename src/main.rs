@@ -14,7 +14,7 @@ fn main() -> Result<()> {
     let config = Config::from_args(&args);
 
     if let Some(dirs) = args.values_of("dir") {
-        stor_age::run(dirs.collect(), &config)
+        stor_age::run(dirs.collect(), &config);
     } else {
         let mut dirs = String::new();
 

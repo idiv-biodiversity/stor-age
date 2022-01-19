@@ -17,7 +17,7 @@ fn show_bytes(data: &HashMap<&str, Data>) {
             "stor_age_bytes_total{{dir=\"{}\"}} {}",
             dir,
             data.get_total_bytes()
-        )
+        );
     }
 
     println!();
@@ -31,7 +31,7 @@ fn show_bytes(data: &HashMap<&str, Data>) {
                 dir,
                 age,
                 data.get_accessed_bytes(*age).unwrap()
-            )
+            );
         }
     }
 
@@ -46,7 +46,7 @@ fn show_bytes(data: &HashMap<&str, Data>) {
                 dir,
                 age,
                 data.get_modified_bytes(*age).unwrap()
-            )
+            );
         }
     }
 }
@@ -60,7 +60,7 @@ fn show_files(data: &HashMap<&str, Data>) {
             "stor_age_files_total{{dir=\"{}\"}} {}",
             dir,
             data.get_total_files()
-        )
+        );
     }
 
     println!();
@@ -74,7 +74,7 @@ fn show_files(data: &HashMap<&str, Data>) {
                 dir,
                 age,
                 data.get_accessed_files(*age).unwrap()
-            )
+            );
         }
     }
 
@@ -89,7 +89,7 @@ fn show_files(data: &HashMap<&str, Data>) {
                 dir,
                 age,
                 data.get_modified_files(*age).unwrap()
-            )
+            );
         }
     }
 }
