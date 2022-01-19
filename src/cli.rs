@@ -3,49 +3,45 @@ use std::path::Path;
 
 use atty::Stream;
 use clap::{crate_description, crate_name, crate_version};
-use clap::{App, AppSettings, Arg};
+use clap::{App, Arg};
 
 use stor_age::Output;
 
-pub fn build() -> App<'static, 'static> {
-    let color = if atty::is(Stream::Stdout) {
-        AppSettings::ColoredHelp
-    } else {
-        AppSettings::ColorNever
-    };
-
-    let age = Arg::with_name("age")
+pub fn build() -> App<'static> {
+    let age = Arg::new("age")
         .help("threshold in days")
-        .multiple(true)
+        .long_help("Specify thresholds in days.")
+        .multiple_occurrences(true)
         .required(true)
         .validator(is_number);
 
-    let debug = Arg::with_name("debug")
+    let debug = Arg::new("debug")
         .long("debug")
         .long_help(
 "Adds very verbose output useful for debugging. Implies `--progress`."
         )
-        .hidden_short_help(true);
+        .hide_short_help(true);
 
-    let progress = Arg::with_name("progress")
+    let progress = Arg::new("progress")
         .long("progress")
+        .hide_short_help(true)
         .help("show progress messages")
         .long_help("Show progress message for each directory.")
         .display_order(3);
 
-    let dir = Arg::with_name("dir")
+    let dir = Arg::new("dir")
         .help("input directories")
         .long_help(
 "The input directories for which to gather information. If none are given, \
  directories are read from standard input. This way, this tool can be used in \
  pipes that get their input from e.g. `find`.",
         )
-        .multiple(true)
+        .multiple_occurrences(true)
         .required(atty::is(Stream::Stdin))
         .last(true)
         .validator(is_dir);
 
-    let format = Arg::with_name("format")
+    let format = Arg::new("format")
         .long("format")
         .help("output format")
         .long_help(
@@ -57,8 +53,8 @@ pub fn build() -> App<'static, 'static> {
  a pretty-printed table."
         )
         .takes_value(true)
-        .case_insensitive(true)
-        .possible_values(&Output::variants())
+        .ignore_case(true)
+        .possible_values(Output::variants())
         .display_order(1);
 
     let format = if cfg!(feature = "table") {
@@ -70,21 +66,25 @@ pub fn build() -> App<'static, 'static> {
     App::new(crate_name!())
         .version(crate_version!())
         .about(crate_description!())
-        .global_setting(color)
-        .help_short("?")
         .arg(age)
         .arg(dir)
         .arg(debug)
         .arg(format)
         .arg(progress)
         .args(&conditional_compilation_args())
+        .mut_arg("help", |a| {
+            a.short('?').help("print help").long_help("Print help.")
+        })
+        .mut_arg("version", |a| {
+            a.hide_short_help(true).long_help("Print version.")
+        })
 }
 
-fn conditional_compilation_args<'a, 'b>() -> Vec<Arg<'a, 'b>> {
+fn conditional_compilation_args<'a>() -> Vec<Arg<'a>> {
     vec![
         #[cfg(target_family = "unix")]
-        Arg::with_name("one-file-system")
-            .short("x")
+        Arg::new("one-file-system")
+            .short('x')
             .long("one-file-system")
             .help("do not cross file system boundaries")
             .long_help(
@@ -94,7 +94,7 @@ fn conditional_compilation_args<'a, 'b>() -> Vec<Arg<'a, 'b>> {
             .display_order(1),
 
         #[cfg(feature = "spectrum-scale")]
-        Arg::with_name("spectrum-scale")
+        Arg::new("spectrum-scale")
             .long("spectrum-scale")
             .help("use mmapplypolicy instead of universal directory traversal")
             .long_help(
@@ -108,7 +108,7 @@ fn conditional_compilation_args<'a, 'b>() -> Vec<Arg<'a, 'b>> {
             .display_order(2),
 
         #[cfg(feature = "spectrum-scale")]
-        Arg::with_name("spectrum-scale-N")
+        Arg::new("spectrum-scale-N")
             .long("spectrum-scale-N")
             .help("use for mmapplypolicy -N argument")
             .long_help(
@@ -119,7 +119,7 @@ fn conditional_compilation_args<'a, 'b>() -> Vec<Arg<'a, 'b>> {
             .value_name("all|mount|Node,...|NodeFile|NodeClass"),
 
         #[cfg(feature = "spectrum-scale")]
-        Arg::with_name("spectrum-scale-g")
+        Arg::new("spectrum-scale-g")
             .long("spectrum-scale-g")
             .help("use for mmapplypolicy -g argument")
             .long_help(
@@ -131,7 +131,7 @@ fn conditional_compilation_args<'a, 'b>() -> Vec<Arg<'a, 'b>> {
             .validator(is_dir),
 
         #[cfg(feature = "spectrum-scale")]
-        Arg::with_name("spectrum-scale-s")
+        Arg::new("spectrum-scale-s")
             .long("spectrum-scale-s")
             .help("use for mmapplypolicy -s argument and policy output")
             .long_help(
@@ -149,8 +149,7 @@ fn conditional_compilation_args<'a, 'b>() -> Vec<Arg<'a, 'b>> {
     ]
 }
 
-#[allow(clippy::needless_pass_by_value)]
-fn is_dir(s: String) -> Result<(), String> {
+fn is_dir(s: &str) -> Result<(), String> {
     let path = Path::new(&s);
 
     if !path.exists() {
@@ -164,8 +163,7 @@ fn is_dir(s: String) -> Result<(), String> {
     }
 }
 
-#[allow(clippy::needless_pass_by_value)]
-fn is_number(s: String) -> Result<(), String> {
+fn is_number(s: &str) -> Result<(), String> {
     if s.parse::<u64>().is_ok() {
         Ok(())
     } else {

@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use clap::{value_t, ArgMatches};
+use clap::ArgMatches;
 
 #[derive(Clone, Copy)]
 pub enum Output {
@@ -77,7 +77,7 @@ impl Config {
         ages_in_days.sort_unstable();
         ages_in_days.dedup();
 
-        let output = value_t!(args, "format", Output).unwrap();
+        let output = args.value_of_t("format").unwrap();
 
         let debug = args.is_present("debug");
         let progress = args.is_present("progress") || debug;
