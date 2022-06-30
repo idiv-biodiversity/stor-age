@@ -1,9 +1,6 @@
 stor-age
 ========
 
-[![Build Status](https://travis-ci.com/idiv-biodiversity/stor-age.svg?branch=master)](https://travis-ci.com/idiv-biodiversity/stor-age)
-[![Build status](https://ci.appveyor.com/api/projects/status/9ifb9uqxmlfdg9n7/branch/master?svg=true)](https://ci.appveyor.com/project/wookietreiber/stor-age/branch/master)
-
 Show aging of directories.
 
 
