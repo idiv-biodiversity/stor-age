@@ -3,11 +3,11 @@ use std::path::Path;
 
 use atty::Stream;
 use clap::{crate_description, crate_name, crate_version};
-use clap::{App, Arg};
+use clap::{Arg, Command};
 
 use stor_age::Output;
 
-pub fn build() -> App<'static> {
+pub fn build() -> Command<'static> {
     let age = Arg::new("age")
         .help("threshold in days")
         .long_help("Specify thresholds in days.")
@@ -63,7 +63,7 @@ pub fn build() -> App<'static> {
         format.required(true)
     };
 
-    App::new(crate_name!())
+    Command::new(crate_name!())
         .version(crate_version!())
         .about(crate_description!())
         .arg(age)
