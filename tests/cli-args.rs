@@ -41,7 +41,7 @@ fn arg_dir_not_a_dir() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-#[cfg(target_family = "unix")]
+#[cfg(target_os = "linux")]
 #[test]
 fn arg_dir_permission_denied() -> Result<(), Box<dyn Error>> {
     let mut cmd = Command::cargo_bin(crate_name!())?;
