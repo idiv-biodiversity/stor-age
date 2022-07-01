@@ -131,6 +131,6 @@ fn dev_check(dev: Option<u64>, meta: &fs::Metadata) -> bool {
 }
 
 #[cfg(not(target_family = "unix"))]
-fn dev_check(_dev: Option<u64>, _meta: &fs::Metadata) -> bool {
+const fn dev_check(_dev: Option<u64>, _meta: &fs::Metadata) -> bool {
     false
 }
