@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{BufReader, Write};
+use std::io::{self, BufReader};
 use std::path::Path;
 use std::process::{Command, Stdio};
 
@@ -23,7 +23,9 @@ pub fn run(dir: &str, config: &Config) -> Result<Data> {
     let policy = tmp.path().join(".policy");
     let prefix = tmp.path().join("stor-age");
 
-    write_policy_file(&policy, config)?;
+    let mut file = File::create(&policy)?;
+    write_policy(&mut file, &config.ages_in_days)?;
+    file.sync_all()?;
 
     let mut command = Command::new("mmapplypolicy");
     command
@@ -85,38 +87,40 @@ pub fn run(dir: &str, config: &Config) -> Result<Data> {
     }
 }
 
-fn write_policy_file(file: &Path, config: &Config) -> Result<()> {
-    let mut file = File::create(file)?;
-
-    let mut content = String::from(
+fn write_policy(mut w: impl io::Write, ages: &[u64]) -> io::Result<()> {
+    write!(
+        w,
         "
 define(access_age, (DAYS(CURRENT_TIMESTAMP) - DAYS(ACCESS_TIME)))
 define(modify_age, (DAYS(CURRENT_TIMESTAMP) - DAYS(MODIFICATION_TIME)))
 
 RULE EXTERNAL LIST 'total' EXEC ''
 ",
-    );
+    )?;
 
-    for age in &config.ages_in_days {
-        content.push_str(&format!(
+    for age in ages {
+        write!(
+            w,
             "
 RULE EXTERNAL LIST 'access_{}' EXEC ''
 RULE EXTERNAL LIST 'modify_{}' EXEC ''
 ",
             age, age
-        ));
+        )?;
     }
 
-    content.push_str(
+    write!(
+        w,
         "
 RULE
   LIST 'total'
   SHOW(VARCHAR(FILE_SIZE))
 ",
-    );
+    )?;
 
-    for age in &config.ages_in_days {
-        content.push_str(&format!(
+    for age in ages {
+        write!(
+            w,
             "
 RULE
   LIST 'access_{}'
@@ -129,10 +133,8 @@ RULE
     WHERE (modify_age < {})
 ",
             age, age, age, age
-        ));
+        )?;
     }
-
-    file.write_all(content.as_bytes())?;
 
     Ok(())
 }
@@ -158,4 +160,58 @@ fn sum(file: &Path) -> Result<(u64, u64)> {
     }
 
     Ok((sum_bytes, sum_files))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn policy() {
+        let ages = vec![90, 365];
+
+        let mut result = vec![];
+        write_policy(&mut result, &ages).unwrap();
+
+        let result = std::str::from_utf8(&result).unwrap();
+
+        let expected = "
+define(access_age, (DAYS(CURRENT_TIMESTAMP) - DAYS(ACCESS_TIME)))
+define(modify_age, (DAYS(CURRENT_TIMESTAMP) - DAYS(MODIFICATION_TIME)))
+
+RULE EXTERNAL LIST 'total' EXEC ''
+
+RULE EXTERNAL LIST 'access_90' EXEC ''
+RULE EXTERNAL LIST 'modify_90' EXEC ''
+
+RULE EXTERNAL LIST 'access_365' EXEC ''
+RULE EXTERNAL LIST 'modify_365' EXEC ''
+
+RULE
+  LIST 'total'
+  SHOW(VARCHAR(FILE_SIZE))
+
+RULE
+  LIST 'access_90'
+    SHOW(VARCHAR(FILE_SIZE))
+    WHERE (access_age < 90)
+
+RULE
+  LIST 'modify_90'
+    SHOW(VARCHAR(FILE_SIZE))
+    WHERE (modify_age < 90)
+
+RULE
+  LIST 'access_365'
+    SHOW(VARCHAR(FILE_SIZE))
+    WHERE (access_age < 365)
+
+RULE
+  LIST 'modify_365'
+    SHOW(VARCHAR(FILE_SIZE))
+    WHERE (modify_age < 365)
+";
+
+        assert_eq!(result, expected);
+    }
 }
