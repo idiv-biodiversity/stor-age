@@ -1,6 +1,7 @@
 use std::str::FromStr;
 
 use clap::ArgMatches;
+use clap::{builder::PossibleValue, ValueEnum};
 
 #[derive(Clone, Copy)]
 pub enum Output {
@@ -12,13 +13,28 @@ pub enum Output {
 
 impl Output {
     #[must_use]
-    pub fn variants<'a>() -> Vec<&'a str> {
-        vec![
-            "oneline",
-            "prometheus",
+    pub const fn name(&self) -> &'static str {
+        match self {
+            Self::Oneline => "oneline",
+            Self::Prometheus => "prometheus",
             #[cfg(feature = "table")]
-            "table",
+            Self::Table => "table",
+        }
+    }
+}
+
+impl ValueEnum for Output {
+    fn value_variants<'a>() -> &'a [Self] {
+        &[
+            Self::Oneline,
+            Self::Prometheus,
+            #[cfg(feature = "table")]
+            Self::Table,
         ]
+    }
+
+    fn to_possible_value<'a>(&self) -> Option<PossibleValue> {
+        Some(PossibleValue::new(self.name()))
     }
 }
 
@@ -71,16 +87,21 @@ impl Config {
     /// Panics if required arguments are not present.
     #[must_use]
     pub fn from_args(args: &ArgMatches) -> Self {
-        let ages_in_days = args.values_of("age").unwrap();
-        let ages_in_days = ages_in_days.map(|age| age.parse().unwrap());
-        let mut ages_in_days: Vec<u64> = ages_in_days.collect();
+        let mut ages_in_days: Vec<u64> = args
+            .get_many::<u64>("age")
+            .expect("age is required")
+            .copied()
+            .collect();
         ages_in_days.sort_unstable();
         ages_in_days.dedup();
 
-        let output = args.value_of_t("format").unwrap();
+        let output = args
+            .get_one::<Output>("format")
+            .copied()
+            .expect("format is required or has default");
 
-        let debug = args.is_present("debug");
-        let progress = args.is_present("progress") || debug;
+        let debug = args.get_flag("debug");
+        let progress = args.get_flag("progress") || debug;
 
         Self {
             debug,
@@ -89,28 +110,28 @@ impl Config {
             output,
 
             #[cfg(target_family = "unix")]
-            one_file_system: args.is_present("one-file-system"),
+            one_file_system: args.get_flag("one-file-system"),
 
             #[cfg(feature = "spectrum-scale")]
-            spectrum_scale: args.is_present("spectrum-scale")
-                || args.is_present("spectrum-scale-N")
-                || args.is_present("spectrum-scale-g")
-                || args.is_present("spectrum-scale-s"),
+            spectrum_scale: args.get_flag("spectrum-scale")
+                || args.contains_id("spectrum-scale-N")
+                || args.contains_id("spectrum-scale-g")
+                || args.contains_id("spectrum-scale-s"),
 
             #[cfg(feature = "spectrum-scale")]
             spectrum_scale_nodes: args
-                .value_of("spectrum-scale-N")
-                .map(String::from),
+                .get_one::<String>("spectrum-scale-N")
+                .cloned(),
 
             #[cfg(feature = "spectrum-scale")]
             spectrum_scale_global_work_dir: args
-                .value_of("spectrum-scale-g")
-                .map(String::from),
+                .get_one::<String>("spectrum-scale-g")
+                .cloned(),
 
             #[cfg(feature = "spectrum-scale")]
             spectrum_scale_local_work_dir: args
-                .value_of("spectrum-scale-s")
-                .map(String::from),
+                .get_one::<String>("spectrum-scale-s")
+                .cloned(),
         }
     }
 }

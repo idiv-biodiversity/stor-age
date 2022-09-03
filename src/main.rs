@@ -13,8 +13,9 @@ fn main() -> Result<()> {
     let args = cli::build().get_matches();
     let config = Config::from_args(&args);
 
-    if let Some(dirs) = args.values_of("dir") {
-        stor_age::run(dirs.collect(), &config);
+    if let Some(dirs) = args.get_many::<String>("dir") {
+        let dirs: Vec<&str> = dirs.map(String::as_str).collect();
+        stor_age::run(&dirs, &config);
     } else {
         let mut dirs = String::new();
 
@@ -22,9 +23,9 @@ fn main() -> Result<()> {
             .read_to_string(&mut dirs)
             .with_context(|| "error reading from stdin")?;
 
-        let dirs = dirs.lines().collect();
+        let dirs: Vec<&str> = dirs.lines().collect();
 
-        stor_age::run(dirs, &config);
+        stor_age::run(&dirs, &config);
     }
 
     Ok(())

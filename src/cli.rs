@@ -2,29 +2,33 @@ use std::fs;
 use std::path::Path;
 
 use atty::Stream;
+use clap::builder::EnumValueParser;
+use clap::value_parser;
 use clap::{crate_description, crate_name, crate_version};
-use clap::{Arg, Command};
+use clap::{Arg, ArgAction, Command};
 
 use stor_age::Output;
 
-pub fn build() -> Command<'static> {
+pub fn build() -> Command {
     let age = Arg::new("age")
         .help("threshold in days")
         .long_help("Specify thresholds in days.")
-        .multiple_occurrences(true)
+        .action(ArgAction::Append)
         .required(true)
-        .validator(is_number);
+        .value_parser(value_parser!(u64));
 
     let debug = Arg::new("debug")
         .long("debug")
         .long_help(
 "Adds very verbose output useful for debugging. Implies `--progress`."
         )
+        .action(ArgAction::SetTrue)
         .hide_short_help(true);
 
     let progress = Arg::new("progress")
         .long("progress")
         .hide_short_help(true)
+        .action(ArgAction::SetTrue)
         .help("show progress messages")
         .long_help("Show progress message for each directory.")
         .display_order(3);
@@ -36,10 +40,10 @@ pub fn build() -> Command<'static> {
  directories are read from standard input. This way, this tool can be used in \
  pipes that get their input from e.g. `find`.",
         )
-        .multiple_occurrences(true)
+        .action(ArgAction::Append)
         .required(atty::is(Stream::Stdin))
         .last(true)
-        .validator(is_dir);
+        .value_parser(is_dir);
 
     let format = Arg::new("format")
         .long("format")
@@ -52,9 +56,9 @@ pub fn build() -> Command<'static> {
  followed by the directory. `table` (cargo feature, enabled by default) shows \
  a pretty-printed table."
         )
-        .takes_value(true)
+        .action(ArgAction::Set)
         .ignore_case(true)
-        .possible_values(Output::variants())
+        .value_parser(EnumValueParser::<Output>::new())
         .display_order(1);
 
     let format = if cfg!(feature = "table") {
@@ -62,6 +66,19 @@ pub fn build() -> Command<'static> {
     } else {
         format.required(true)
     };
+
+    let help = Arg::new("help")
+        .short('?')
+        .long("help")
+        .help("print help (use --help to see all options)")
+        .long_help("Print help.")
+        .action(ArgAction::Help);
+
+    let version = Arg::new("version")
+        .long("version")
+        .long_help("Print version.")
+        .hide_short_help(true)
+        .action(ArgAction::Version);
 
     Command::new(crate_name!())
         .version(crate_version!())
@@ -72,20 +89,19 @@ pub fn build() -> Command<'static> {
         .arg(format)
         .arg(progress)
         .args(&conditional_compilation_args())
-        .mut_arg("help", |a| {
-            a.short('?').help("print help").long_help("Print help.")
-        })
-        .mut_arg("version", |a| {
-            a.hide_short_help(true).long_help("Print version.")
-        })
+        .disable_help_flag(true)
+        .disable_version_flag(true)
+        .arg(help)
+        .arg(version)
 }
 
-fn conditional_compilation_args<'a>() -> Vec<Arg<'a>> {
+fn conditional_compilation_args() -> Vec<Arg> {
     vec![
         #[cfg(target_family = "unix")]
         Arg::new("one-file-system")
             .short('x')
             .long("one-file-system")
+            .action(ArgAction::SetTrue)
             .help("do not cross file system boundaries")
             .long_help(
 "Do not cross file system boundaries, i.e. skip files and directories on \
@@ -96,6 +112,7 @@ fn conditional_compilation_args<'a>() -> Vec<Arg<'a>> {
         #[cfg(feature = "spectrum-scale")]
         Arg::new("spectrum-scale")
             .long("spectrum-scale")
+            .action(ArgAction::SetTrue)
             .help("use mmapplypolicy instead of universal directory traversal")
             .long_help(
 "On IBM Spectrum Scale file systems exists a dedicated command that allows \
@@ -110,12 +127,12 @@ fn conditional_compilation_args<'a>() -> Vec<Arg<'a>> {
         #[cfg(feature = "spectrum-scale")]
         Arg::new("spectrum-scale-N")
             .long("spectrum-scale-N")
+            .action(ArgAction::Set)
             .help("use for mmapplypolicy -N argument")
             .long_help(
 "Specify list of nodes to use with `mmapplypolicy -N`. For detailed \
  information, see `man mmapplypolicy`. Implies `--spectrum-scale`.",
             )
-            .takes_value(true)
             .value_name("all|mount|Node,...|NodeFile|NodeClass"),
 
         #[cfg(feature = "spectrum-scale")]
@@ -126,9 +143,9 @@ fn conditional_compilation_args<'a>() -> Vec<Arg<'a>> {
 "Specify global work directory to use with `mmapplypolicy -g`. For detailed \
  information, see `man mmapplypolicy`. Implies `--spectrum-scale`.",
             )
-            .takes_value(true)
+            .action(ArgAction::Set)
             .value_name("dir")
-            .validator(is_dir),
+            .value_parser(is_dir),
 
         #[cfg(feature = "spectrum-scale")]
         Arg::new("spectrum-scale-s")
@@ -143,13 +160,13 @@ fn conditional_compilation_args<'a>() -> Vec<Arg<'a>> {
  information about the `-s` argument, see `man mmapplypolicy`. Implies \
  `--spectrum-scale`.",
             )
-            .takes_value(true)
+            .action(ArgAction::Set)
             .value_name("dir")
-            .validator(is_dir),
+            .value_parser(is_dir),
     ]
 }
 
-fn is_dir(s: &str) -> Result<(), String> {
+fn is_dir(s: &str) -> Result<String, String> {
     let path = Path::new(&s);
 
     if !path.exists() {
@@ -159,14 +176,18 @@ fn is_dir(s: &str) -> Result<(), String> {
     } else if let Err(error) = fs::read_dir(path) {
         Err(error.to_string())
     } else {
-        Ok(())
+        Ok(String::from(s))
     }
 }
 
-fn is_number(s: &str) -> Result<(), String> {
-    if s.parse::<u64>().is_ok() {
-        Ok(())
-    } else {
-        Err(format!("not a positive number: {}", s))
+// ----------------------------------------------------------------------------
+// tests
+// ----------------------------------------------------------------------------
+
+#[cfg(test)]
+mod test {
+    #[test]
+    fn verify_cli() {
+        super::build().debug_assert();
     }
 }

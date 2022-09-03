@@ -12,8 +12,8 @@ use crate::Config;
 use crate::Data;
 use crate::Output;
 
-pub fn run(dirs: Vec<&str>, config: &Config) {
-    let mut results = HashMap::new();
+pub fn run(dirs: &[&str], config: &Config) {
+    let mut results: HashMap<&str, Data> = HashMap::new();
 
     for dir in dirs {
         log::progress(format!("analyzing {}", dir), config);

@@ -17,7 +17,7 @@ anyhow = "1"
 atty = "0.2"
 
 [dependencies.bstr]
-version = "0.2"
+version = "1"
 optional = true
 
 [dependencies.bytesize]
@@ -25,11 +25,11 @@ version = "1"
 optional = true
 
 [dependencies.clap]
-version = "3"
-features = ["cargo", "wrap_help"]
+version = "4"
+features = ["cargo", "deprecated", "wrap_help"]
 
 [dependencies.prettytable-rs]
-version = "0.8"
+version = "0.9"
 optional = true
 default_features = false
 features = ["win_crlf"]
