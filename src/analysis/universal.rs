@@ -56,7 +56,7 @@ fn walk(
         Ok(entries) => iterate(entries, data, thresholds, dev, config),
 
         Err(error) if error.kind() == ErrorKind::PermissionDenied => {
-            log::info(format!("skipping permission denied: {:?}", dir));
+            log::info(format!("skipping permission denied: {dir:?}"));
             Ok(data)
         }
 
@@ -79,11 +79,11 @@ fn iterate(
 
         if dev_check(dev, &meta) {
             log::debug(
-                format!("skipping different file system: {:?}", path),
+                format!("skipping different file system: {path:?}"),
                 config,
             );
         } else if file_type.is_file() {
-            log::debug(format!("visiting: {:?}", path), config);
+            log::debug(format!("visiting: {path:?}"), config);
 
             let bytes = meta.len();
 
@@ -108,14 +108,13 @@ fn iterate(
 
             data += current;
         } else if file_type.is_dir() {
-            log::debug(format!("descending: {:?}", path), config);
+            log::debug(format!("descending: {path:?}"), config);
 
             data += walk(&path, thresholds, dev, config)?;
         } else {
             log::debug(
                 format!(
-                    "skipping neither regular file nor directory: {:?}",
-                    path
+                    "skipping neither regular file nor directory: {path:?}"
                 ),
                 config,
             );

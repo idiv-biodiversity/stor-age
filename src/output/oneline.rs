@@ -13,10 +13,7 @@ pub fn show(data: &HashMap<&str, Data>) {
             let a_f = data.get_accessed_files(*age).unwrap();
             let m_f = data.get_modified_files(*age).unwrap();
 
-            println!(
-                "{}:{}:{}:{}:{}:{}:{}:{}",
-                age, t_b, a_b, m_b, t_f, a_f, m_f, dir
-            );
+            println!("{age}:{t_b}:{a_b}:{m_b}:{t_f}:{a_f}:{m_f}:{dir}");
         }
     }
 }

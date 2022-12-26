@@ -61,13 +61,13 @@ pub fn show(data: &HashMap<&str, Data>) {
             let modified_bytes = ByteSize(modified_bytes).to_string_as(true);
 
             row.add_cell(cell!(r->accessed_bytes));
-            row.add_cell(cell!(r->format!("{}%", accessed_bytes_percentage)));
+            row.add_cell(cell!(r->format!("{accessed_bytes_percentage}%")));
 
             row.add_cell(cell!(r->modified_bytes));
-            row.add_cell(cell!(r->format!("{}%", modified_bytes_percentage)));
+            row.add_cell(cell!(r->format!("{modified_bytes_percentage}%")));
 
             if first {
-                row.add_cell(cell!(r->format!("{}", total_files)));
+                row.add_cell(cell!(r->format!("{total_files}")));
             } else {
                 row.add_cell(cell!(r->""));
             }
@@ -79,10 +79,10 @@ pub fn show(data: &HashMap<&str, Data>) {
                 percentage(total_files, accessed_files, modified_files);
 
             row.add_cell(cell!(r->accessed_files));
-            row.add_cell(cell!(r->format!("{}%", accessed_files_percentage)));
+            row.add_cell(cell!(r->format!("{accessed_files_percentage}%")));
 
             row.add_cell(cell!(r->modified_files));
-            row.add_cell(cell!(r->format!("{}%", modified_files_percentage)));
+            row.add_cell(cell!(r->format!("{modified_files_percentage}%")));
 
             table.add_row(row);
 

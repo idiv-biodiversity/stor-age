@@ -16,7 +16,7 @@ pub fn run(dirs: &[&str], config: &Config) {
     let mut results: HashMap<&str, Data> = HashMap::new();
 
     for dir in dirs {
-        log::progress(format!("analyzing {}", dir), config);
+        log::progress(format!("analyzing {dir}"), config);
 
         let result = run_conditional(dir, config);
 
@@ -26,7 +26,7 @@ pub fn run(dirs: &[&str], config: &Config) {
             }
 
             Err(error) => {
-                log::error(format!("skipping {}: {}", dir, error));
+                log::error(format!("skipping {dir}: {error}"));
             }
         }
     }

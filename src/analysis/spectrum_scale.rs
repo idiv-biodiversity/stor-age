@@ -48,7 +48,7 @@ pub fn run(dir: &str, config: &Config) -> Result<Data> {
         command.args(&["-g", global_work_dir]);
     };
 
-    log::debug(format!("command: {:?}", command), config);
+    log::debug(format!("command: {command:?}"), config);
 
     let mut child = command
         .stdout(Stdio::null())
@@ -70,10 +70,10 @@ pub fn run(dir: &str, config: &Config) -> Result<Data> {
 
         for age in &config.ages_in_days {
             let access_file =
-                tmp.path().join(format!("stor-age.list.access_{}", age));
+                tmp.path().join(format!("stor-age.list.access_{age}"));
 
             let modify_file =
-                tmp.path().join(format!("stor-age.list.modify_{}", age));
+                tmp.path().join(format!("stor-age.list.modify_{age}"));
 
             let (a_b, a_f) = sum(&access_file)?;
             let (m_b, m_f) = sum(&modify_file)?;
@@ -102,10 +102,9 @@ RULE EXTERNAL LIST 'total' EXEC ''
         write!(
             w,
             "
-RULE EXTERNAL LIST 'access_{}' EXEC ''
-RULE EXTERNAL LIST 'modify_{}' EXEC ''
-",
-            age, age
+RULE EXTERNAL LIST 'access_{age}' EXEC ''
+RULE EXTERNAL LIST 'modify_{age}' EXEC ''
+"
         )?;
     }
 
@@ -123,16 +122,15 @@ RULE
             w,
             "
 RULE
-  LIST 'access_{}'
+  LIST 'access_{age}'
     SHOW(VARCHAR(FILE_SIZE))
-    WHERE (access_age < {})
+    WHERE (access_age < {age})
 
 RULE
-  LIST 'modify_{}'
+  LIST 'modify_{age}'
     SHOW(VARCHAR(FILE_SIZE))
-    WHERE (modify_age < {})
-",
-            age, age, age, age
+    WHERE (modify_age < {age})
+"
         )?;
     }
 
