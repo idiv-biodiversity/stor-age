@@ -30,22 +30,22 @@ pub fn run(dir: &str, config: &Config) -> Result<Data> {
     let mut command = Command::new("mmapplypolicy");
     command
         .arg(dir)
-        .args(&["-P", policy.to_str().unwrap()])
-        .args(&["-f", prefix.to_str().unwrap()])
-        .args(&["--choice-algorithm", "fast"])
-        .args(&["-I", "defer"])
-        .args(&["-L", "0"]);
+        .args(["-P", policy.to_str().unwrap()])
+        .args(["-f", prefix.to_str().unwrap()])
+        .args(["--choice-algorithm", "fast"])
+        .args(["-I", "defer"])
+        .args(["-L", "0"]);
 
     if let Some(nodes) = &config.spectrum_scale_nodes {
-        command.args(&["-N", nodes]);
+        command.args(["-N", nodes]);
     };
 
     if let Some(local_work_dir) = &config.spectrum_scale_local_work_dir {
-        command.args(&["-s", local_work_dir]);
+        command.args(["-s", local_work_dir]);
     };
 
     if let Some(global_work_dir) = &config.spectrum_scale_global_work_dir {
-        command.args(&["-g", global_work_dir]);
+        command.args(["-g", global_work_dir]);
     };
 
     log::debug(format!("command: {command:?}"), config);
