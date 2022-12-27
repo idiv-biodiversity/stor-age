@@ -1,11 +1,11 @@
 use std::fs;
 use std::path::Path;
 
-use atty::Stream;
 use clap::builder::EnumValueParser;
 use clap::value_parser;
 use clap::{crate_description, crate_name, crate_version};
 use clap::{Arg, ArgAction, Command};
+use is_terminal::IsTerminal;
 
 use stor_age::Output;
 
@@ -41,7 +41,7 @@ pub fn build() -> Command {
  pipes that get their input from e.g. `find`.",
         )
         .action(ArgAction::Append)
-        .required(atty::is(Stream::Stdin))
+        .required(std::io::stdin().is_terminal())
         .last(true)
         .value_parser(is_dir);
 
