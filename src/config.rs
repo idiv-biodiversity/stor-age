@@ -3,7 +3,7 @@ use std::str::FromStr;
 use clap::ArgMatches;
 use clap::{builder::PossibleValue, ValueEnum};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum Output {
     Oneline,
     Prometheus,
@@ -56,7 +56,7 @@ impl FromStr for Output {
 }
 
 #[allow(clippy::struct_excessive_bools)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Config {
     pub debug: bool,
     pub progress: bool,

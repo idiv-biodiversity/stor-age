@@ -13,6 +13,8 @@ fn main() -> Result<()> {
     let args = cli::build().get_matches();
     let config = Config::from_args(&args);
 
+    stor_age::log::debug(format!("{config:#?}"), &config);
+
     if let Some(dirs) = args.get_many::<String>("dir") {
         let dirs: Vec<&str> = dirs.map(String::as_str).collect();
         stor_age::run(&dirs, &config);
