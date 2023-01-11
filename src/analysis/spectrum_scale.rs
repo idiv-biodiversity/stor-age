@@ -1,3 +1,4 @@
+use std::ffi::OsStr;
 use std::fs::File;
 use std::io::{self, BufReader};
 use std::path::Path;
@@ -33,8 +34,8 @@ pub fn run(
     let mut command = Command::new("mmapplypolicy");
     command
         .arg(dir)
-        .args(["-P", policy.to_str().unwrap()])
-        .args(["-f", prefix.to_str().unwrap()])
+        .args([OsStr::new("-P"), policy.as_os_str()])
+        .args([OsStr::new("-f"), prefix.as_os_str()])
         .args(["--choice-algorithm", "fast"])
         .args(["-I", "defer"])
         .args(["-L", "0"]);

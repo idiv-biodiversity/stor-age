@@ -51,8 +51,10 @@ pub fn show(data: &HashMap<&str, Data>) {
                 row.add_cell(cell!(r->""));
             }
 
-            let accessed_bytes = data.get_accessed_bytes(*age).unwrap();
-            let modified_bytes = data.get_modified_bytes(*age).unwrap();
+            let accessed_bytes =
+                data.get_accessed_bytes(*age).unwrap_or_default();
+            let modified_bytes =
+                data.get_modified_bytes(*age).unwrap_or_default();
 
             let (accessed_bytes_percentage, modified_bytes_percentage) =
                 percentage(total_bytes, accessed_bytes, modified_bytes);
@@ -72,8 +74,10 @@ pub fn show(data: &HashMap<&str, Data>) {
                 row.add_cell(cell!(r->""));
             }
 
-            let accessed_files = data.get_accessed_files(*age).unwrap();
-            let modified_files = data.get_modified_files(*age).unwrap();
+            let accessed_files =
+                data.get_accessed_files(*age).unwrap_or_default();
+            let modified_files =
+                data.get_modified_files(*age).unwrap_or_default();
 
             let (accessed_files_percentage, modified_files_percentage) =
                 percentage(total_files, accessed_files, modified_files);
