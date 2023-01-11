@@ -8,23 +8,26 @@ use bstr::io::BufReadExt;
 use bstr::ByteSlice;
 use tempfile::{tempdir, tempdir_in};
 
-use crate::log;
-use crate::Config;
 use crate::Data;
 
-pub fn run(dir: &str, config: &Config) -> Result<Data> {
-    let tmp =
-        if let Some(local_work_dir) = &config.spectrum_scale_local_work_dir {
-            tempdir_in(local_work_dir)?
-        } else {
-            tempdir()?
-        };
+pub fn run(
+    dir: &str,
+    ages_in_days: &[u64],
+    nodes: Option<&str>,
+    local_work_dir: Option<&str>,
+    global_work_dir: Option<&str>,
+) -> Result<Data> {
+    let tmp = if let Some(local_work_dir) = local_work_dir {
+        tempdir_in(local_work_dir)?
+    } else {
+        tempdir()?
+    };
 
     let policy = tmp.path().join(".policy");
     let prefix = tmp.path().join("stor-age");
 
     let mut file = File::create(&policy)?;
-    write_policy(&mut file, &config.ages_in_days)?;
+    write_policy(&mut file, ages_in_days)?;
     file.sync_all()?;
 
     let mut command = Command::new("mmapplypolicy");
@@ -36,26 +39,26 @@ pub fn run(dir: &str, config: &Config) -> Result<Data> {
         .args(["-I", "defer"])
         .args(["-L", "0"]);
 
-    if let Some(nodes) = &config.spectrum_scale_nodes {
+    if let Some(nodes) = nodes {
         command.args(["-N", nodes]);
     };
 
-    if let Some(local_work_dir) = &config.spectrum_scale_local_work_dir {
+    if let Some(local_work_dir) = local_work_dir {
         command.args(["-s", local_work_dir]);
     };
 
-    if let Some(global_work_dir) = &config.spectrum_scale_global_work_dir {
+    if let Some(global_work_dir) = global_work_dir {
         command.args(["-g", global_work_dir]);
     };
 
-    log::debug(format!("command: {command:?}"), config);
+    log::debug!("command: {command:?}");
 
     let mut child = command
         .stdout(Stdio::null())
         .spawn()
         .expect("mmapplypolicy failed to start, make sure it's on your PATH");
 
-    log::debug("waiting for mmapplypolicy to finish", config);
+    log::debug!("waiting for mmapplypolicy to finish");
 
     let ecode = child.wait().expect("failed waiting on mmapplypolicy");
 
@@ -64,11 +67,11 @@ pub fn run(dir: &str, config: &Config) -> Result<Data> {
         let (tot_bytes, tot_files) = sum(&total_file)?;
 
         let mut data = Data::default()
-            .with_ages(&config.ages_in_days)
+            .with_ages(ages_in_days)
             .with_total_bytes(tot_bytes)
             .with_total_files(tot_files);
 
-        for age in &config.ages_in_days {
+        for age in ages_in_days {
             let access_file =
                 tmp.path().join(format!("stor-age.list.access_{age}"));
 

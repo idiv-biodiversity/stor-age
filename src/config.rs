@@ -1,59 +1,6 @@
-use std::str::FromStr;
-
 use clap::ArgMatches;
-use clap::{builder::PossibleValue, ValueEnum};
 
-#[derive(Clone, Copy, Debug)]
-pub enum Output {
-    Oneline,
-    Prometheus,
-    #[cfg(feature = "table")]
-    Table,
-}
-
-impl Output {
-    #[must_use]
-    pub const fn name(&self) -> &'static str {
-        match self {
-            Self::Oneline => "oneline",
-            Self::Prometheus => "prometheus",
-            #[cfg(feature = "table")]
-            Self::Table => "table",
-        }
-    }
-}
-
-impl ValueEnum for Output {
-    fn value_variants<'a>() -> &'a [Self] {
-        &[
-            Self::Oneline,
-            Self::Prometheus,
-            #[cfg(feature = "table")]
-            Self::Table,
-        ]
-    }
-
-    fn to_possible_value<'a>(&self) -> Option<PossibleValue> {
-        Some(PossibleValue::new(self.name()))
-    }
-}
-
-impl FromStr for Output {
-    type Err = String;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let s = s.to_lowercase();
-        let s = s.as_str();
-
-        match s {
-            "oneline" => Ok(Self::Oneline),
-            "prometheus" => Ok(Self::Prometheus),
-            #[cfg(feature = "table")]
-            "table" => Ok(Self::Table),
-            _ => Err(String::from("invalid output")),
-        }
-    }
-}
+use crate::Output;
 
 #[allow(clippy::struct_excessive_bools)]
 #[derive(Clone, Debug)]

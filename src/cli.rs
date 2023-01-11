@@ -1,15 +1,17 @@
 use std::fs;
 use std::path::Path;
+use std::str::FromStr;
 
-use clap::builder::EnumValueParser;
+use clap::builder::{EnumValueParser, PossibleValue};
 use clap::value_parser;
 use clap::{crate_description, crate_name, crate_version};
-use clap::{Arg, ArgAction, Command};
-use is_terminal::IsTerminal;
+use clap::{Arg, ArgAction, Command, ValueEnum};
 
-use stor_age::Output;
+// ----------------------------------------------------------------------------
+// CLI definition
+// ----------------------------------------------------------------------------
 
-pub fn build() -> Command {
+pub fn build(stdin_terminal: bool) -> Command {
     let age = Arg::new("age")
         .help("threshold in days")
         .long_help("Specify thresholds in days.")
@@ -41,7 +43,7 @@ pub fn build() -> Command {
  pipes that get their input from e.g. `find`.",
         )
         .action(ArgAction::Append)
-        .required(std::io::stdin().is_terminal())
+        .required(stdin_terminal)
         .last(true)
         .value_parser(is_dir);
 
@@ -181,6 +183,62 @@ fn is_dir(s: &str) -> Result<String, String> {
 }
 
 // ----------------------------------------------------------------------------
+// output enum
+// ----------------------------------------------------------------------------
+
+#[derive(Clone, Copy, Debug)]
+pub enum Output {
+    Oneline,
+    Prometheus,
+    #[cfg(feature = "table")]
+    Table,
+}
+
+impl Output {
+    #[must_use]
+    pub const fn name(self) -> &'static str {
+        match self {
+            Self::Oneline => "oneline",
+            Self::Prometheus => "prometheus",
+            #[cfg(feature = "table")]
+            Self::Table => "table",
+        }
+    }
+}
+
+impl ValueEnum for Output {
+    fn value_variants<'a>() -> &'a [Self] {
+        &[
+            Self::Oneline,
+            Self::Prometheus,
+            #[cfg(feature = "table")]
+            Self::Table,
+        ]
+    }
+
+    fn to_possible_value<'a>(&self) -> Option<PossibleValue> {
+        Some(PossibleValue::new(self.name()))
+    }
+}
+
+impl FromStr for Output {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s = s.to_lowercase();
+        let s = s.as_str();
+
+        match s {
+            "oneline" => Ok(Self::Oneline),
+            "prometheus" => Ok(Self::Prometheus),
+            #[cfg(feature = "table")]
+            "table" => Ok(Self::Table),
+            _ => Err(String::from("invalid output")),
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------
 // tests
 // ----------------------------------------------------------------------------
 
@@ -188,6 +246,6 @@ fn is_dir(s: &str) -> Result<String, String> {
 mod test {
     #[test]
     fn verify_cli() {
-        super::build().debug_assert();
+        super::build(true).debug_assert();
     }
 }

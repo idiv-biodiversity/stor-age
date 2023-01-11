@@ -9,15 +9,17 @@ use std::os::unix::fs::MetadataExt;
 
 use anyhow::Result;
 
-use crate::log;
-use crate::Config;
 use crate::Data;
 
-pub fn run(dir: &str, config: &Config) -> Result<Data> {
-    let thresholds = thresholds(&config.ages_in_days);
+pub fn run(
+    dir: &str,
+    ages_in_days: &[u64],
+    one_file_system: bool,
+) -> Result<Data> {
+    let thresholds = thresholds(ages_in_days);
 
     #[cfg(target_family = "unix")]
-    let dev = if config.one_file_system {
+    let dev = if one_file_system {
         Some(fs::metadata(dir)?.dev())
     } else {
         None
@@ -26,7 +28,7 @@ pub fn run(dir: &str, config: &Config) -> Result<Data> {
     #[cfg(not(target_family = "unix"))]
     let dev = None;
 
-    walk(Path::new(dir), &thresholds, dev, config)
+    walk(Path::new(dir), &thresholds, ages_in_days, dev)
 }
 
 fn thresholds(ages_in_days: &[u64]) -> HashMap<u64, SystemTime> {
@@ -47,16 +49,16 @@ fn thresholds(ages_in_days: &[u64]) -> HashMap<u64, SystemTime> {
 fn walk(
     dir: &Path,
     thresholds: &HashMap<u64, SystemTime>,
+    ages_in_days: &[u64],
     dev: Option<u64>,
-    config: &Config,
 ) -> Result<Data> {
-    let data = Data::default().with_ages(&config.ages_in_days);
+    let data = Data::default().with_ages(ages_in_days);
 
     match fs::read_dir(dir) {
-        Ok(entries) => iterate(entries, data, thresholds, dev, config),
+        Ok(entries) => iterate(entries, data, thresholds, ages_in_days, dev),
 
         Err(error) if error.kind() == ErrorKind::PermissionDenied => {
-            log::info(format!("skipping permission denied: {dir:?}"));
+            log::info!("skipping permission denied: {dir:?}");
             Ok(data)
         }
 
@@ -68,8 +70,8 @@ fn iterate(
     entries: ReadDir,
     mut data: Data,
     thresholds: &HashMap<u64, SystemTime>,
+    ages_in_days: &[u64],
     dev: Option<u64>,
-    config: &Config,
 ) -> Result<Data> {
     for entry in entries {
         let entry = entry?;
@@ -78,12 +80,9 @@ fn iterate(
         let file_type = meta.file_type();
 
         if dev_check(dev, &meta) {
-            log::debug(
-                format!("skipping different file system: {path:?}"),
-                config,
-            );
+            log::debug!("skipping different file system: {path:?}");
         } else if file_type.is_file() {
-            log::debug(format!("visiting: {path:?}"), config);
+            log::debug!("visiting: {path:?}");
 
             let bytes = meta.len();
 
@@ -108,15 +107,12 @@ fn iterate(
 
             data += current;
         } else if file_type.is_dir() {
-            log::debug(format!("descending: {path:?}"), config);
+            log::debug!("descending: {path:?}");
 
-            data += walk(&path, thresholds, dev, config)?;
+            data += walk(&path, thresholds, ages_in_days, dev)?;
         } else {
-            log::debug(
-                format!(
-                    "skipping neither regular file nor directory: {path:?}"
-                ),
-                config,
+            log::debug!(
+                "skipping neither regular file nor directory: {path:?}"
             );
         }
     }
