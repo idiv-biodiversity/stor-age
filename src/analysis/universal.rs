@@ -11,6 +11,12 @@ use anyhow::Result;
 
 use crate::Data;
 
+/// Runs universal directory traversal.
+///
+/// # Errors
+///
+/// - walking directory
+/// - reading inode metadata
 pub fn run(
     dir: &str,
     ages_in_days: &[u64],

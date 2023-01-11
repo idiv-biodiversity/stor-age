@@ -11,6 +11,14 @@ use tempfile::{tempdir, tempdir_in};
 
 use crate::Data;
 
+/// Runs `mmapplypolicy` on Spectrum Scale file systems.
+///
+/// # Errors
+///
+/// - creating tmp directory
+/// - writing policy file
+/// - running `mmapplypolicy`
+/// - parsing `mmapplypolicy` output
 pub fn run(
     dir: &str,
     ages_in_days: &[u64],
