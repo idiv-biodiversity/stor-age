@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::hash::BuildHasher;
 
 use bytesize::ByteSize;
 use prettytable::{cell, format::FormatBuilder, Row, Table};
@@ -6,7 +7,7 @@ use smooth::Smooth;
 
 use crate::Data;
 
-pub fn show(data: &HashMap<&str, Data>) {
+pub fn show<S: BuildHasher>(data: &HashMap<&str, Data, S>) {
     let mut table = Table::new();
     let format = FormatBuilder::new().column_separator(' ').build();
     table.set_format(format);

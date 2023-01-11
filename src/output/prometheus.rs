@@ -1,14 +1,15 @@
 use std::collections::HashMap;
+use std::hash::BuildHasher;
 
 use crate::Data;
 
-pub fn show(data: &HashMap<&str, Data>) {
+pub fn show<S: BuildHasher>(data: &HashMap<&str, Data, S>) {
     show_bytes(data);
     println!();
     show_files(data);
 }
 
-fn show_bytes(data: &HashMap<&str, Data>) {
+fn show_bytes<S: BuildHasher>(data: &HashMap<&str, Data, S>) {
     println!("# HELP stor_age_bytes_total Total size in bytes.");
     println!("# TYPE stor_age_bytes_total gauge");
 
@@ -51,7 +52,7 @@ fn show_bytes(data: &HashMap<&str, Data>) {
     }
 }
 
-fn show_files(data: &HashMap<&str, Data>) {
+fn show_files<S: BuildHasher>(data: &HashMap<&str, Data, S>) {
     println!("# HELP stor_age_files_total Total number of files.");
     println!("# TYPE stor_age_files_total gauge");
 
