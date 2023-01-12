@@ -20,7 +20,8 @@ use crate::Data;
 pub fn run(
     dir: &str,
     ages_in_days: &[u64],
-    one_file_system: bool,
+    // ALLOW not needed on non-unix platforms
+    #[allow(unused_variables)] one_file_system: bool,
 ) -> Result<Data> {
     let thresholds = thresholds(ages_in_days);
 

@@ -10,7 +10,6 @@ pub struct Config {
     pub ages_in_days: Vec<u64>,
     pub output: Output,
 
-    #[cfg(target_family = "unix")]
     pub one_file_system: bool,
 
     #[cfg(feature = "spectrum-scale")]
@@ -50,14 +49,17 @@ impl Config {
         let debug = args.get_flag("debug");
         let progress = args.get_flag("progress") || debug;
 
+        let one_file_system =
+            args.try_contains_id("one-file-system").unwrap_or_default()
+                && args.get_flag("one-file-system");
+
         Self {
             debug,
             progress,
             ages_in_days,
             output,
 
-            #[cfg(target_family = "unix")]
-            one_file_system: args.get_flag("one-file-system"),
+            one_file_system,
 
             #[cfg(feature = "spectrum-scale")]
             spectrum_scale: args.get_flag("spectrum-scale")
