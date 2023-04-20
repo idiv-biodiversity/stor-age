@@ -37,7 +37,7 @@ default_features = false
 features = ["win_crlf"]
 
 [dependencies.smooth]
-version = "0.1"
+version = "0.2"
 optional = true
 
 [dependencies.tempfile]
@@ -51,7 +51,7 @@ table = ["bytesize", "prettytable-rs", "smooth"]
 
 [dev-dependencies]
 assert_cmd = "2"
-predicates = "2"
+predicates = "3"
 tempfile = "3"
 
 [build-dependencies]
