@@ -62,14 +62,17 @@ pub fn run(
 
     log::debug!("command: {command:?}");
 
-    let mut child = command
-        .stdout(Stdio::null())
-        .spawn()
-        .expect("mmapplypolicy failed to start, make sure it's on your PATH");
+    let Ok(mut child) = command.stdout(Stdio::null()).spawn() else {
+        return Err(anyhow!(
+            "mmapplypolicy failed to start, make sure it's on your PATH",
+        ));
+    };
 
     log::debug!("waiting for mmapplypolicy to finish");
 
-    let ecode = child.wait().expect("failed waiting on mmapplypolicy");
+    let Ok(ecode) = child.wait() else {
+        return Err(anyhow!("failed waiting on mmapplypolicy"));
+    };
 
     if ecode.success() {
         let total_file = tmp.path().join("stor-age.list.total");
