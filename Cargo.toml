@@ -1,6 +1,6 @@
 [package]
 name = "stor-age"
-version = "0.6.4"
+version = "0.6.5"
 authors = ["Christian Krause <christian.krause@mailbox.org>"]
 description = "show aging of directories"
 license = "GPL-3.0-or-later"
