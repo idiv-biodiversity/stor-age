@@ -90,7 +90,7 @@ pub fn build(stdin_terminal: bool) -> Command {
         .arg(debug)
         .arg(format)
         .arg(progress)
-        .args(&conditional_compilation_args())
+        .args(conditional_compilation_args())
         .disable_help_flag(true)
         .disable_version_flag(true)
         .arg(help)
