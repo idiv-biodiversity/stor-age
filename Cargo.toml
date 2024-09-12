@@ -31,6 +31,11 @@ optional = true
 version = "4"
 features = ["cargo", "deprecated", "wrap_help"]
 
+[dependencies.mmpolicy]
+path = "../mmpolicy"
+features = ["clap", "log"]
+optional = true
+
 [dependencies.prettytable-rs]
 version = "0.10"
 optional = true
@@ -47,7 +52,7 @@ optional = true
 
 [features]
 default = ["table"]
-spectrum-scale = ["bstr", "tempfile"]
+spectrum-scale = ["bstr", "mmpolicy", "tempfile"]
 table = ["bytesize", "prettytable-rs", "smooth"]
 
 [dev-dependencies]
