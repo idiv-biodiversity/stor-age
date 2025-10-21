@@ -50,15 +50,15 @@ pub fn run(
 
     if let Some(nodes) = nodes {
         command.args(["-N", nodes]);
-    };
+    }
 
     if let Some(local_work_dir) = local_work_dir {
         command.args(["-s", local_work_dir]);
-    };
+    }
 
     if let Some(global_work_dir) = global_work_dir {
         command.args(["-g", global_work_dir]);
-    };
+    }
 
     log::debug!("command: {command:?}");
 
