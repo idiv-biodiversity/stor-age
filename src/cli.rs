@@ -172,9 +172,9 @@ fn is_dir(s: &str) -> Result<String, String> {
     let path = Path::new(&s);
 
     if !path.exists() {
-        Err(format!("does not exist: {path:?}"))
+        Err(format!("does not exist: {}", path.display()))
     } else if !path.is_dir() {
-        Err(format!("is not a directory: {path:?}"))
+        Err(format!("is not a directory: {}", path.display()))
     } else if let Err(error) = fs::read_dir(path) {
         Err(error.to_string())
     } else {

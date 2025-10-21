@@ -31,8 +31,10 @@ fn skip_link_dir() -> Result<(), Box<dyn Error>> {
     let mut cmd = Command::cargo_bin(crate_name!()).unwrap();
     cmd.arg("--debug").arg("1").arg("--").arg(dir.path());
 
-    let skip_msg =
-        format!("skipping neither regular file nor directory: {link:?}");
+    let skip_msg = format!(
+        "skipping neither regular file nor directory: {}",
+        link.display()
+    );
 
     cmd.assert()
         .success()
@@ -63,8 +65,10 @@ fn skip_link_file() -> Result<(), Box<dyn Error>> {
     let mut cmd = Command::cargo_bin(crate_name!()).unwrap();
     cmd.arg("--debug").arg("1").arg("--").arg(dir.path());
 
-    let skip_msg =
-        format!("skipping neither regular file nor directory: {link:?}");
+    let skip_msg = format!(
+        "skipping neither regular file nor directory: {}",
+        link.display()
+    );
 
     cmd.assert()
         .success()
