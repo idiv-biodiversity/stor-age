@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::hash::BuildHasher;
 
 use bytesize::ByteSize;
-use prettytable::{cell, format::FormatBuilder, Row, Table};
+use prettytable::{Row, Table, cell, format::FormatBuilder};
 use smooth::Smooth;
 
 use crate::Data;

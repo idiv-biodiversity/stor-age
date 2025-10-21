@@ -4,8 +4,8 @@ use std::str::FromStr;
 
 use clap::builder::{EnumValueParser, PossibleValue};
 use clap::value_parser;
-use clap::{crate_description, crate_name, crate_version};
 use clap::{Arg, ArgAction, Command, ValueEnum};
+use clap::{crate_description, crate_name, crate_version};
 
 // ----------------------------------------------------------------------------
 // CLI definition

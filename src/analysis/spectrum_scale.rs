@@ -4,9 +4,9 @@ use std::io::{self, BufReader};
 use std::path::Path;
 use std::process::{Command, Stdio};
 
-use anyhow::{anyhow, Result};
-use bstr::io::BufReadExt;
+use anyhow::{Result, anyhow};
 use bstr::ByteSlice;
+use bstr::io::BufReadExt;
 use tempfile::{tempdir, tempdir_in};
 
 use crate::Data;
