@@ -130,7 +130,7 @@ fn iterate(
 
 #[cfg(target_family = "unix")]
 fn dev_check(dev: Option<u64>, meta: &fs::Metadata) -> bool {
-    dev.map_or(false, |dev| dev != meta.dev())
+    dev.is_some_and(|dev| dev != meta.dev())
 }
 
 #[cfg(not(target_family = "unix"))]
