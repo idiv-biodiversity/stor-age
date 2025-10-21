@@ -45,9 +45,7 @@ pub fn show<S: BuildHasher>(data: &HashMap<&str, Data, S>) {
             row.add_cell(cell!(r->age));
 
             if first {
-                row.add_cell(
-                    cell!(r->ByteSize(total_bytes).to_string_as(true)),
-                );
+                row.add_cell(cell!(r->ByteSize(total_bytes).display().iec()));
             } else {
                 row.add_cell(cell!(r->""));
             }
@@ -60,8 +58,8 @@ pub fn show<S: BuildHasher>(data: &HashMap<&str, Data, S>) {
             let (accessed_bytes_percentage, modified_bytes_percentage) =
                 percentage(total_bytes, accessed_bytes, modified_bytes);
 
-            let accessed_bytes = ByteSize(accessed_bytes).to_string_as(true);
-            let modified_bytes = ByteSize(modified_bytes).to_string_as(true);
+            let accessed_bytes = ByteSize(accessed_bytes).display().iec();
+            let modified_bytes = ByteSize(modified_bytes).display().iec();
 
             row.add_cell(cell!(r->accessed_bytes));
             row.add_cell(cell!(r->format!("{accessed_bytes_percentage}%")));
