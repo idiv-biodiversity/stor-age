@@ -24,7 +24,7 @@ impl AddAssign for Count {
 pub struct Data {
     total_bytes: u64,
     total_files: u64,
-    underlying: HashMap<u64, Count>,
+    inner: HashMap<u64, Count>,
 }
 
 impl Data {
@@ -51,22 +51,22 @@ impl Data {
 
     #[must_use]
     pub fn get_accessed_bytes(&self, age: u64) -> Option<u64> {
-        self.underlying.get(&age).map(|data| data.accessed_bytes)
+        self.inner.get(&age).map(|data| data.accessed_bytes)
     }
 
     #[must_use]
     pub fn get_modified_bytes(&self, age: u64) -> Option<u64> {
-        self.underlying.get(&age).map(|data| data.modified_bytes)
+        self.inner.get(&age).map(|data| data.modified_bytes)
     }
 
     #[must_use]
     pub fn get_accessed_files(&self, age: u64) -> Option<u64> {
-        self.underlying.get(&age).map(|data| data.accessed_files)
+        self.inner.get(&age).map(|data| data.accessed_files)
     }
 
     #[must_use]
     pub fn get_modified_files(&self, age: u64) -> Option<u64> {
-        self.underlying.get(&age).map(|data| data.modified_files)
+        self.inner.get(&age).map(|data| data.modified_files)
     }
 
     #[must_use]
@@ -81,7 +81,7 @@ impl Data {
 
     #[must_use]
     pub fn get_ages(&self) -> Vec<&u64> {
-        let mut ages: Vec<&u64> = self.underlying.keys().collect();
+        let mut ages: Vec<&u64> = self.inner.keys().collect();
         ages.sort();
         ages
     }
@@ -101,7 +101,7 @@ impl Data {
             modified_files,
         };
 
-        self.underlying.insert(age, a);
+        self.inner.insert(age, a);
     }
 }
 
@@ -110,8 +110,8 @@ impl AddAssign for Data {
         self.total_bytes += other.total_bytes;
         self.total_files += other.total_files;
 
-        for (age, acc) in other.underlying {
-            let sum = self.underlying.entry(age).or_default();
+        for (age, acc) in other.inner {
+            let sum = self.inner.entry(age).or_default();
             *sum += acc;
         }
     }
