@@ -5,10 +5,9 @@ mod cli;
 mod config;
 
 use std::collections::HashMap;
-use std::io::{self, Read};
+use std::io::{self, IsTerminal, Read};
 
 use anyhow::{Context, Result};
-use is_terminal::IsTerminal;
 use stor_age::Data;
 
 use crate::cli::Output;
