@@ -63,23 +63,23 @@ impl Config {
 
             #[cfg(feature = "spectrum-scale")]
             spectrum_scale: args.get_flag("spectrum-scale")
-                || args.contains_id("spectrum-scale-N")
-                || args.contains_id("spectrum-scale-g")
-                || args.contains_id("spectrum-scale-s"),
+                || args.contains_id(mmpolicy::clap::ARG_NODES)
+                || args.contains_id(mmpolicy::clap::ARG_GLOBAL_WORK_DIR)
+                || args.contains_id(mmpolicy::clap::ARG_LOCAL_WORK_DIR),
 
             #[cfg(feature = "spectrum-scale")]
             spectrum_scale_nodes: args
-                .get_one::<String>("spectrum-scale-N")
+                .get_one::<String>(mmpolicy::clap::ARG_NODES)
                 .cloned(),
 
             #[cfg(feature = "spectrum-scale")]
             spectrum_scale_global_work_dir: args
-                .get_one::<String>("spectrum-scale-g")
+                .get_one::<String>(mmpolicy::clap::ARG_GLOBAL_WORK_DIR)
                 .cloned(),
 
             #[cfg(feature = "spectrum-scale")]
             spectrum_scale_local_work_dir: args
-                .get_one::<String>("spectrum-scale-s")
+                .get_one::<String>(mmpolicy::clap::ARG_LOCAL_WORK_DIR)
                 .cloned(),
         }
     }

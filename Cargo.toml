@@ -30,6 +30,11 @@ optional = true
 version = "4"
 features = ["cargo", "deprecated", "wrap_help"]
 
+[dependencies.mmpolicy]
+path = "../mmpolicy"
+features = ["clap", "log"]
+optional = true
+
 [dependencies.prettytable-rs]
 version = "0.10"
 optional = true
@@ -46,11 +51,12 @@ optional = true
 
 [features]
 default = ["table"]
-spectrum-scale = ["bstr", "tempfile"]
+spectrum-scale = ["bstr", "mmpolicy", "tempfile"]
 table = ["bytesize", "prettytable-rs", "smooth"]
 
 [dev-dependencies]
 assert_cmd = "2"
+indoc = "2"
 predicates = "3"
 tempfile = "3"
 
@@ -58,3 +64,4 @@ tempfile = "3"
 clap = { version = "4", features = ["cargo"] }
 clap_complete = "4"
 clap_mangen = "0.2"
+mmpolicy = { path = "../mmpolicy", features = ["clap", "log"] }
