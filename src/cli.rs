@@ -123,7 +123,7 @@ pub fn build(stdin_terminal: bool) -> Command {
 }
 
 fn conditional_compilation_args() -> Vec<Arg> {
-    vec![
+    let mut args = vec![
         #[cfg(target_family = "unix")]
         Arg::new("one-file-system")
             .short('x')
@@ -151,50 +151,13 @@ fn conditional_compilation_args() -> Vec<Arg> {
  command.",
             )
             .display_order(2),
+    ];
 
-        #[cfg(feature = "storage-scale")]
-        Arg::new("storage-scale-N")
-            .long("storage-scale-N")
-            .visible_aliases(["gpfs-N", "spectrum-scale-N"])
-            .action(ArgAction::Set)
-            .help("use for mmapplypolicy -N argument")
-            .long_help(
-"Specify list of nodes to use with `mmapplypolicy -N`. For detailed \
- information, see `man mmapplypolicy`. Implies `--storage-scale`.",
-            )
-            .value_name("all|mount|Node,...|NodeFile|NodeClass"),
+    if cfg!(feature = "storage-scale") {
+        args.extend(mmpolicy::clap::args_parallel());
+    }
 
-        #[cfg(feature = "storage-scale")]
-        Arg::new("storage-scale-g")
-            .long("storage-scale-g")
-            .visible_aliases(["gpfs-g", "spectrum-scale-g"])
-            .help("use for mmapplypolicy -g argument")
-            .long_help(
-"Specify global work directory to use with `mmapplypolicy -g`. For detailed \
- information, see `man mmapplypolicy`. Implies `--storage-scale`.",
-            )
-            .action(ArgAction::Set)
-            .value_name("dir")
-            .value_parser(is_dir),
-
-        #[cfg(feature = "storage-scale")]
-        Arg::new("storage-scale-s")
-            .long("storage-scale-s")
-            .visible_aliases(["gpfs-s", "spectrum-scale-s"])
-            .help("use for mmapplypolicy -s argument and policy output")
-            .long_help(
-"Specify local work directory to use with `mmapplypolicy -s`. Also, the \
- output of the LIST policies will be written to this directory temporarily \
- before being processed by this tool. Defaults to the system temporary \
- directory. This might be too small for large directories, e.g. more than 30 \
- GiB are needed for a directory with 180 million files. For detailed \
- information about the `-s` argument, see `man mmapplypolicy`. Implies \
- `--storage-scale`.",
-            )
-            .action(ArgAction::Set)
-            .value_name("dir")
-            .value_parser(is_dir),
-    ]
+    args
 }
 
 fn is_dir(s: &str) -> Result<String, String> {

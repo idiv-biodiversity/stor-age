@@ -35,6 +35,11 @@ features = ["cargo", "deprecated", "wrap_help"]
 version = "8"
 optional = true
 
+[dependencies.mmpolicy]
+path = "../mmpolicy"
+features = ["clap", "log"]
+optional = true
+
 [dependencies.smooth]
 version = "0.3"
 optional = true
@@ -45,11 +50,12 @@ optional = true
 
 [features]
 default = ["table"]
-storage-scale = ["bstr", "tempfile"]
+storage-scale = ["bstr", "mmpolicy", "tempfile"]
 table = ["bytesize", "comfy-table", "smooth"]
 
 [dev-dependencies]
 assert_cmd = "2"
+indoc = "2"
 predicates = "3"
 tempfile = "3"
 
@@ -57,3 +63,4 @@ tempfile = "3"
 clap = { version = "4", features = ["cargo"] }
 clap_complete = "4"
 clap_mangen = "0.3"
+mmpolicy = { path = "../mmpolicy", features = ["clap", "log"] }

@@ -80,23 +80,23 @@ impl Config {
 
             #[cfg(feature = "storage-scale")]
             storage_scale: args.get_flag("storage-scale")
-                || args.contains_id("storage-scale-N")
-                || args.contains_id("storage-scale-g")
-                || args.contains_id("storage-scale-s"),
+                || args.contains_id(mmpolicy::clap::ARG_NODES)
+                || args.contains_id(mmpolicy::clap::ARG_GLOBAL_WORK_DIR)
+                || args.contains_id(mmpolicy::clap::ARG_LOCAL_WORK_DIR),
 
             #[cfg(feature = "storage-scale")]
             storage_scale_nodes: args
-                .get_one::<String>("storage-scale-N")
+                .get_one::<String>(mmpolicy::clap::ARG_NODES)
                 .cloned(),
 
             #[cfg(feature = "storage-scale")]
             storage_scale_global_work_dir: args
-                .get_one::<String>("storage-scale-g")
+                .get_one::<String>(mmpolicy::clap::ARG_GLOBAL_WORK_DIR)
                 .cloned(),
 
             #[cfg(feature = "storage-scale")]
             storage_scale_local_work_dir: args
-                .get_one::<String>("storage-scale-s")
+                .get_one::<String>(mmpolicy::clap::ARG_LOCAL_WORK_DIR)
                 .cloned(),
         }
     }

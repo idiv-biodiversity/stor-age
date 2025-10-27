@@ -1,12 +1,13 @@
 use std::ffi::OsStr;
 use std::fs::File;
-use std::io::{self, BufReader};
+use std::io::BufReader;
 use std::path::Path;
 use std::process::{Command, Stdio};
 
 use anyhow::{Result, anyhow};
 use bstr::ByteSlice;
 use bstr::io::BufReadExt;
+use mmpolicy::prelude::*;
 use tempfile::{tempdir, tempdir_in};
 
 use crate::Data;
@@ -32,17 +33,18 @@ pub fn run(
         tempdir()?
     };
 
-    let policy = tmp.path().join(".policy");
+    let policy_path = tmp.path().join(".policy");
     let prefix = tmp.path().join("stor-age");
 
-    let mut file = File::create(&policy)?;
-    write_policy(&mut file, ages_in_days)?;
+    let mut file = File::create(&policy_path)?;
+    let policy = write_policy(ages_in_days);
+    policy.write(&mut file)?;
     file.sync_all()?;
 
     let mut command = Command::new("mmapplypolicy");
     command
         .arg(dir)
-        .args([OsStr::new("-P"), policy.as_os_str()])
+        .args([OsStr::new("-P"), policy_path.as_os_str()])
         .args([OsStr::new("-f"), prefix.as_os_str()])
         .args(["--choice-algorithm", "fast"])
         .args(["-I", "defer"])
@@ -102,54 +104,60 @@ pub fn run(
     }
 }
 
-fn write_policy(mut w: impl io::Write, ages: &[u64]) -> io::Result<()> {
-    write!(
-        w,
-        "
-define(access_age, (DAYS(CURRENT_TIMESTAMP) - DAYS(ACCESS_TIME)))
-define(modify_age, (DAYS(CURRENT_TIMESTAMP) - DAYS(MODIFICATION_TIME)))
+fn write_policy(ages: &[u64]) -> Policy {
+    let mut policy = Policy::new("stor-age");
 
-RULE EXTERNAL LIST 'total' EXEC ''
-",
-    )?;
+    policy.defines.push(Definition::new(
+        "access_age",
+        "(DAYS(CURRENT_TIMESTAMP) - DAYS(ACCESS_TIME))",
+    ));
 
-    for age in ages {
-        write!(
-            w,
-            "
-RULE EXTERNAL LIST 'access_{age}' EXEC ''
-RULE EXTERNAL LIST 'modify_{age}' EXEC ''
-"
-        )?;
-    }
+    policy.defines.push(Definition::new(
+        "modify_age",
+        "(DAYS(CURRENT_TIMESTAMP) - DAYS(MODIFICATION_TIME))",
+    ));
 
-    write!(
-        w,
-        "
-RULE
-  LIST 'total'
-  SHOW(VARCHAR(FILE_SIZE))
-",
-    )?;
+    policy.rules.push(Rule::from(RuleType::ExternalList(
+        Name("total".into()),
+        Exec(String::new()),
+    )));
 
     for age in ages {
-        write!(
-            w,
-            "
-RULE
-  LIST 'access_{age}'
-    SHOW(VARCHAR(FILE_SIZE))
-    WHERE (access_age < {age})
+        policy.rules.push(Rule::from(RuleType::ExternalList(
+            Name(format!("access_{age}")),
+            Exec(String::new()),
+        )));
 
-RULE
-  LIST 'modify_{age}'
-    SHOW(VARCHAR(FILE_SIZE))
-    WHERE (modify_age < {age})
-"
-        )?;
+        policy.rules.push(Rule::from(RuleType::ExternalList(
+            Name(format!("modify_{age}")),
+            Exec(String::new()),
+        )));
     }
 
-    Ok(())
+    policy.rules.push(Rule::from(RuleType::List(
+        Name("total".into()),
+        DirectoriesPlus(false),
+        vec![Show::FileSize],
+        None,
+    )));
+
+    for age in ages {
+        policy.rules.push(Rule::from(RuleType::List(
+            Name(format!("access_{age}")),
+            DirectoriesPlus(false),
+            vec![Show::FileSize],
+            Some(Where::Free(format!("(access_age < {age})"))),
+        )));
+
+        policy.rules.push(Rule::from(RuleType::List(
+            Name(format!("modify_{age}")),
+            DirectoriesPlus(false),
+            vec![Show::FileSize],
+            Some(Where::Free(format!("(modify_age < {age})"))),
+        )));
+    }
+
+    policy
 }
 
 fn sum(file: &Path) -> Result<(u64, u64)> {
@@ -179,51 +187,67 @@ fn sum(file: &Path) -> Result<(u64, u64)> {
 mod tests {
     use super::*;
 
+    use indoc::indoc;
+
     #[test]
     fn policy() {
         let ages = vec![90, 365];
 
         let mut result = vec![];
-        write_policy(&mut result, &ages).unwrap();
+        let policy = write_policy(&ages);
+        policy.write(&mut result).unwrap();
 
         let result = std::str::from_utf8(&result).unwrap();
 
-        let expected = "
-define(access_age, (DAYS(CURRENT_TIMESTAMP) - DAYS(ACCESS_TIME)))
-define(modify_age, (DAYS(CURRENT_TIMESTAMP) - DAYS(MODIFICATION_TIME)))
+        let expected = indoc! {"
+          define(access_age, (DAYS(CURRENT_TIMESTAMP) - DAYS(ACCESS_TIME)))
+          define(modify_age, (DAYS(CURRENT_TIMESTAMP) - DAYS(MODIFICATION_TIME)))
 
-RULE EXTERNAL LIST 'total' EXEC ''
+          RULE
+            EXTERNAL LIST 'total'
+            EXEC ''
 
-RULE EXTERNAL LIST 'access_90' EXEC ''
-RULE EXTERNAL LIST 'modify_90' EXEC ''
+          RULE
+            EXTERNAL LIST 'access_90'
+            EXEC ''
 
-RULE EXTERNAL LIST 'access_365' EXEC ''
-RULE EXTERNAL LIST 'modify_365' EXEC ''
+          RULE
+            EXTERNAL LIST 'modify_90'
+            EXEC ''
 
-RULE
-  LIST 'total'
-  SHOW(VARCHAR(FILE_SIZE))
+          RULE
+            EXTERNAL LIST 'access_365'
+            EXEC ''
 
-RULE
-  LIST 'access_90'
-    SHOW(VARCHAR(FILE_SIZE))
-    WHERE (access_age < 90)
+          RULE
+            EXTERNAL LIST 'modify_365'
+            EXEC ''
 
-RULE
-  LIST 'modify_90'
-    SHOW(VARCHAR(FILE_SIZE))
-    WHERE (modify_age < 90)
+          RULE
+            LIST 'total'
+            SHOW(VARCHAR(FILE_SIZE))
 
-RULE
-  LIST 'access_365'
-    SHOW(VARCHAR(FILE_SIZE))
-    WHERE (access_age < 365)
+          RULE
+            LIST 'access_90'
+            SHOW(VARCHAR(FILE_SIZE))
+            WHERE (access_age < 90)
 
-RULE
-  LIST 'modify_365'
-    SHOW(VARCHAR(FILE_SIZE))
-    WHERE (modify_age < 365)
-";
+          RULE
+            LIST 'modify_90'
+            SHOW(VARCHAR(FILE_SIZE))
+            WHERE (modify_age < 90)
+
+          RULE
+            LIST 'access_365'
+            SHOW(VARCHAR(FILE_SIZE))
+            WHERE (access_age < 365)
+
+          RULE
+            LIST 'modify_365'
+            SHOW(VARCHAR(FILE_SIZE))
+            WHERE (modify_age < 365)
+          "
+        };
 
         assert_eq!(result, expected);
     }
