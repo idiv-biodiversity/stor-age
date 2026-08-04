@@ -4,7 +4,7 @@ use std::io::Write;
 use std::os;
 use std::process::Command;
 
-use assert_cmd::crate_name;
+use assert_cmd::pkg_name;
 use assert_cmd::prelude::*;
 use predicates::prelude::*;
 use tempfile::tempdir;
@@ -28,7 +28,7 @@ fn skip_link_dir() -> Result<(), Box<dyn Error>> {
     #[cfg(target_family = "windows")]
     os::windows::fs::symlink_dir(subdir, &link)?;
 
-    let mut cmd = Command::cargo_bin(crate_name!()).unwrap();
+    let mut cmd = Command::cargo_bin(pkg_name!()).unwrap();
     cmd.arg("--debug").arg("1").arg("--").arg(dir.path());
 
     let skip_msg = format!(
@@ -62,7 +62,7 @@ fn skip_link_file() -> Result<(), Box<dyn Error>> {
     #[cfg(target_family = "windows")]
     os::windows::fs::symlink_file(path, &link)?;
 
-    let mut cmd = Command::cargo_bin(crate_name!()).unwrap();
+    let mut cmd = Command::cargo_bin(pkg_name!()).unwrap();
     cmd.arg("--debug").arg("1").arg("--").arg(dir.path());
 
     let skip_msg = format!(
