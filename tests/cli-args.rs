@@ -1,13 +1,13 @@
 use std::error::Error;
 use std::process::Command;
 
-use assert_cmd::crate_name;
+use assert_cmd::pkg_name;
 use assert_cmd::prelude::*;
 use predicates::prelude::*;
 
 #[test]
 fn arg_age_invalid() -> Result<(), Box<dyn Error>> {
-    let mut cmd = Command::cargo_bin(crate_name!())?;
+    let mut cmd = Command::cargo_bin(pkg_name!())?;
     cmd.arg("not-an-age");
 
     cmd.assert()
@@ -19,7 +19,7 @@ fn arg_age_invalid() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn arg_dir_does_not_exist() -> Result<(), Box<dyn Error>> {
-    let mut cmd = Command::cargo_bin(crate_name!())?;
+    let mut cmd = Command::cargo_bin(pkg_name!())?;
     cmd.arg("90").arg("--").arg("test/file/doesnt/exist");
 
     cmd.assert()
@@ -31,7 +31,7 @@ fn arg_dir_does_not_exist() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn arg_dir_not_a_dir() -> Result<(), Box<dyn Error>> {
-    let mut cmd = Command::cargo_bin(crate_name!())?;
+    let mut cmd = Command::cargo_bin(pkg_name!())?;
     cmd.arg("90").arg("--").arg("Cargo.toml");
 
     cmd.assert()
@@ -44,7 +44,7 @@ fn arg_dir_not_a_dir() -> Result<(), Box<dyn Error>> {
 #[cfg(target_os = "linux")]
 #[test]
 fn arg_dir_permission_denied() -> Result<(), Box<dyn Error>> {
-    let mut cmd = Command::cargo_bin(crate_name!())?;
+    let mut cmd = Command::cargo_bin(pkg_name!())?;
     cmd.arg("90").arg("--").arg("/root");
 
     cmd.assert()
