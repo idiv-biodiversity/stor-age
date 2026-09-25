@@ -62,7 +62,11 @@ pub fn run(dirs: &[&str], config: &Config) {
 
         match result {
             Ok(acc) => {
-                results.insert(dir, acc);
+                if config.output == Output::Oneline {
+                    stor_age::output::oneline(dir, &acc);
+                } else {
+                    results.insert(dir, acc);
+                }
             }
 
             Err(error) => {
@@ -75,7 +79,7 @@ pub fn run(dirs: &[&str], config: &Config) {
         #[cfg(feature = "table")]
         Output::Markdown => stor_age::output::table(&results, true),
         Output::Prometheus => stor_age::output::prometheus(&results),
-        Output::Oneline => stor_age::output::oneline(&results),
+        Output::Oneline => {} // do nothing because immediately handled above
         #[cfg(feature = "table")]
         Output::Table => stor_age::output::table(&results, false),
     }

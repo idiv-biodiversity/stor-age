@@ -186,7 +186,7 @@ fn is_dir(s: &str) -> Result<String, String> {
 // output enum
 // ----------------------------------------------------------------------------
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Output {
     #[cfg(feature = "table")]
     Markdown,
