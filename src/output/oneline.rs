@@ -1,9 +1,8 @@
-use std::collections::HashMap;
-use std::hash::BuildHasher;
+use std::collections::BTreeMap;
 
 use crate::Data;
 
-pub fn show<S: BuildHasher>(data: &HashMap<&str, Data, S>) {
+pub fn show(data: &BTreeMap<&str, Data>) {
     for (dir, data) in data {
         let t_b = data.get_total_bytes();
         let t_f = data.get_total_files();
