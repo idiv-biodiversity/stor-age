@@ -56,7 +56,9 @@ pub fn build(stdin_terminal: bool) -> Command {
  that shows a colon (\":\") separated list of age, total, accessed, and \
  modified size in bytes, total, accessed, and modified number of files, \
  followed by the directory. `table` (cargo feature, enabled by default) shows \
- a pretty-printed table."
+ a pretty-printed table, while `markdown` (also the `table` cargo feature) \
+ shows a markdown-formatted table that can be rendered by pandoc, GitHub, and \
+ GitLab."
         )
         .action(ArgAction::Set)
         .ignore_case(true)
@@ -188,6 +190,8 @@ fn is_dir(s: &str) -> Result<String, String> {
 
 #[derive(Clone, Copy, Debug)]
 pub enum Output {
+    #[cfg(feature = "table")]
+    Markdown,
     Oneline,
     Prometheus,
     #[cfg(feature = "table")]
@@ -198,6 +202,8 @@ impl Output {
     #[must_use]
     pub const fn name(self) -> &'static str {
         match self {
+            #[cfg(feature = "table")]
+            Self::Markdown => "markdown",
             Self::Oneline => "oneline",
             Self::Prometheus => "prometheus",
             #[cfg(feature = "table")]
@@ -209,6 +215,8 @@ impl Output {
 impl ValueEnum for Output {
     fn value_variants<'a>() -> &'a [Self] {
         &[
+            #[cfg(feature = "table")]
+            Self::Markdown,
             Self::Oneline,
             Self::Prometheus,
             #[cfg(feature = "table")]
@@ -229,6 +237,8 @@ impl FromStr for Output {
         let s = s.as_str();
 
         match s {
+            #[cfg(feature = "table")]
+            "markdown" => Ok(Self::Markdown),
             "oneline" => Ok(Self::Oneline),
             "prometheus" => Ok(Self::Prometheus),
             #[cfg(feature = "table")]
