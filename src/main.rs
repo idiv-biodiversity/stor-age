@@ -4,7 +4,7 @@
 mod cli;
 mod config;
 
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::io::{self, IsTerminal, Read};
 
 use anyhow::{Context, Result};
@@ -51,7 +51,7 @@ fn main() -> Result<()> {
 }
 
 pub fn run(dirs: &[&str], config: &Config) {
-    let mut results: HashMap<&str, Data> = HashMap::new();
+    let mut results: BTreeMap<&str, Data> = BTreeMap::new();
 
     for dir in dirs {
         if config.progress {

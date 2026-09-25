@@ -1,5 +1,4 @@
-use std::collections::HashMap;
-use std::hash::BuildHasher;
+use std::collections::BTreeMap;
 
 use bytesize::ByteSize;
 use comfy_table::presets;
@@ -8,7 +7,7 @@ use smooth::Smooth;
 
 use crate::Data;
 
-pub fn show<S: BuildHasher>(data: &HashMap<&str, Data, S>, markdown: bool) {
+pub fn show(data: &BTreeMap<&str, Data>, markdown: bool) {
     let mut table = Table::new();
 
     if markdown {
