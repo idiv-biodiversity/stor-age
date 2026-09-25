@@ -188,6 +188,8 @@ fn is_dir(s: &str) -> Result<String, String> {
 
 #[derive(Clone, Copy, Debug)]
 pub enum Output {
+    #[cfg(feature = "table")]
+    Markdown,
     Oneline,
     Prometheus,
     #[cfg(feature = "table")]
@@ -198,6 +200,8 @@ impl Output {
     #[must_use]
     pub const fn name(self) -> &'static str {
         match self {
+            #[cfg(feature = "table")]
+            Self::Markdown => "markdown",
             Self::Oneline => "oneline",
             Self::Prometheus => "prometheus",
             #[cfg(feature = "table")]
@@ -209,6 +213,8 @@ impl Output {
 impl ValueEnum for Output {
     fn value_variants<'a>() -> &'a [Self] {
         &[
+            #[cfg(feature = "table")]
+            Self::Markdown,
             Self::Oneline,
             Self::Prometheus,
             #[cfg(feature = "table")]
@@ -229,6 +235,8 @@ impl FromStr for Output {
         let s = s.as_str();
 
         match s {
+            #[cfg(feature = "table")]
+            "markdown" => Ok(Self::Markdown),
             "oneline" => Ok(Self::Oneline),
             "prometheus" => Ok(Self::Prometheus),
             #[cfg(feature = "table")]

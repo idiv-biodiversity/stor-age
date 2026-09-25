@@ -72,10 +72,12 @@ pub fn run(dirs: &[&str], config: &Config) {
     }
 
     match config.output {
+        #[cfg(feature = "table")]
+        Output::Markdown => stor_age::output::table(&results, true),
         Output::Prometheus => stor_age::output::prometheus(&results),
         Output::Oneline => stor_age::output::oneline(&results),
         #[cfg(feature = "table")]
-        Output::Table => stor_age::output::table(&results),
+        Output::Table => stor_age::output::table(&results, false),
     }
 }
 
