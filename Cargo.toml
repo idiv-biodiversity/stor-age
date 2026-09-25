@@ -11,7 +11,7 @@ repository = "https://github.com/idiv-biodiversity/stor-age"
 keywords = ["storage", "age", "spectrum-scale"]
 categories = ["command-line-utilities", "filesystem"]
 edition = "2024"
-rust-version = "1.85"
+rust-version = "1.88"
 
 [dependencies]
 anyhow = "1"
@@ -30,11 +30,9 @@ optional = true
 version = "4"
 features = ["cargo", "deprecated", "wrap_help"]
 
-[dependencies.prettytable-rs]
-version = "0.10"
+[dependencies.comfy-table]
+version = "8"
 optional = true
-default-features = false
-features = ["win_crlf"]
 
 [dependencies.smooth]
 version = "0.3"
@@ -47,7 +45,7 @@ optional = true
 [features]
 default = ["table"]
 spectrum-scale = ["bstr", "tempfile"]
-table = ["bytesize", "prettytable-rs", "smooth"]
+table = ["bytesize", "comfy-table", "smooth"]
 
 [dev-dependencies]
 assert_cmd = "2"
