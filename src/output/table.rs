@@ -2,30 +2,32 @@ use std::collections::HashMap;
 use std::hash::BuildHasher;
 
 use bytesize::ByteSize;
-use prettytable::{Row, Table, cell, format::FormatBuilder};
+use comfy_table::presets;
+use comfy_table::{Attribute, Cell, CellAlignment, Row, Table};
 use smooth::Smooth;
 
 use crate::Data;
 
 pub fn show<S: BuildHasher>(data: &HashMap<&str, Data, S>) {
     let mut table = Table::new();
-    let format = FormatBuilder::new().column_separator(' ').build();
-    table.set_format(format);
+    table.load_style(presets::NOTHING);
 
-    let mut titles = Row::empty();
-    titles.add_cell(cell!(bu->"Directory"));
-    titles.add_cell(cell!(bu->"Age"));
-    titles.add_cell(cell!(bu->"Bytes"));
-    titles.add_cell(cell!(bu->"Accessed"));
-    titles.add_cell(cell!(bu->"Percent"));
-    titles.add_cell(cell!(bu->"Modified"));
-    titles.add_cell(cell!(bu->"Percent"));
-    titles.add_cell(cell!(bu->"Files"));
-    titles.add_cell(cell!(bu->"Accessed"));
-    titles.add_cell(cell!(bu->"Percent"));
-    titles.add_cell(cell!(bu->"Modified"));
-    titles.add_cell(cell!(bu->"Percent"));
-    table.set_titles(titles);
+    let header_attributes = vec![Attribute::Bold, Attribute::Underlined];
+
+    table.set_header(vec![
+        Cell::new("Directory").add_attributes(header_attributes.clone()),
+        Cell::new("Age").add_attributes(header_attributes.clone()),
+        Cell::new("Bytes").add_attributes(header_attributes.clone()),
+        Cell::new("Accessed").add_attributes(header_attributes.clone()),
+        Cell::new("Percent").add_attributes(header_attributes.clone()),
+        Cell::new("Modified").add_attributes(header_attributes.clone()),
+        Cell::new("Percent").add_attributes(header_attributes.clone()),
+        Cell::new("Files").add_attributes(header_attributes.clone()),
+        Cell::new("Accessed").add_attributes(header_attributes.clone()),
+        Cell::new("Percent").add_attributes(header_attributes.clone()),
+        Cell::new("Modified").add_attributes(header_attributes.clone()),
+        Cell::new("Percent").add_attributes(header_attributes),
+    ]);
 
     for (dir, data) in data {
         let total_bytes = data.get_total_bytes();
@@ -34,20 +36,25 @@ pub fn show<S: BuildHasher>(data: &HashMap<&str, Data, S>) {
         let mut first = true;
 
         for age in data.get_ages() {
-            let mut row = Row::empty();
+            let mut row = Row::new();
 
             if first {
-                row.add_cell(cell!(dir));
+                row.add_cell(Cell::new(dir));
             } else {
-                row.add_cell(cell!(""));
+                row.add_cell(Cell::new(""));
             }
 
-            row.add_cell(cell!(r->age));
+            row.add_cell(Cell::new(age).set_alignment(CellAlignment::Right));
 
             if first {
-                row.add_cell(cell!(r->ByteSize(total_bytes).display().iec()));
+                row.add_cell(
+                    Cell::new(ByteSize(total_bytes).display().iec())
+                        .set_alignment(CellAlignment::Right),
+                );
             } else {
-                row.add_cell(cell!(r->""));
+                row.add_cell(
+                    Cell::new("").set_alignment(CellAlignment::Right),
+                );
             }
 
             let accessed_bytes =
@@ -61,16 +68,31 @@ pub fn show<S: BuildHasher>(data: &HashMap<&str, Data, S>) {
             let accessed_bytes = ByteSize(accessed_bytes).display().iec();
             let modified_bytes = ByteSize(modified_bytes).display().iec();
 
-            row.add_cell(cell!(r->accessed_bytes));
-            row.add_cell(cell!(r->format!("{accessed_bytes_percentage}%")));
+            row.add_cell(
+                Cell::new(accessed_bytes).set_alignment(CellAlignment::Right),
+            );
+            row.add_cell(
+                Cell::new_owned(format!("{accessed_bytes_percentage}%"))
+                    .set_alignment(CellAlignment::Right),
+            );
 
-            row.add_cell(cell!(r->modified_bytes));
-            row.add_cell(cell!(r->format!("{modified_bytes_percentage}%")));
+            row.add_cell(
+                Cell::new(modified_bytes).set_alignment(CellAlignment::Right),
+            );
+            row.add_cell(
+                Cell::new_owned(format!("{modified_bytes_percentage}%"))
+                    .set_alignment(CellAlignment::Right),
+            );
 
             if first {
-                row.add_cell(cell!(r->format!("{total_files}")));
+                row.add_cell(
+                    Cell::new_owned(format!("{total_files}"))
+                        .set_alignment(CellAlignment::Right),
+                );
             } else {
-                row.add_cell(cell!(r->""));
+                row.add_cell(
+                    Cell::new("").set_alignment(CellAlignment::Right),
+                );
             }
 
             let accessed_files =
@@ -81,11 +103,21 @@ pub fn show<S: BuildHasher>(data: &HashMap<&str, Data, S>) {
             let (accessed_files_percentage, modified_files_percentage) =
                 percentage(total_files, accessed_files, modified_files);
 
-            row.add_cell(cell!(r->accessed_files));
-            row.add_cell(cell!(r->format!("{accessed_files_percentage}%")));
+            row.add_cell(
+                Cell::new(accessed_files).set_alignment(CellAlignment::Right),
+            );
+            row.add_cell(
+                Cell::new_owned(format!("{accessed_files_percentage}%"))
+                    .set_alignment(CellAlignment::Right),
+            );
 
-            row.add_cell(cell!(r->modified_files));
-            row.add_cell(cell!(r->format!("{modified_files_percentage}%")));
+            row.add_cell(
+                Cell::new(modified_files).set_alignment(CellAlignment::Right),
+            );
+            row.add_cell(
+                Cell::new_owned(format!("{modified_files_percentage}%"))
+                    .set_alignment(CellAlignment::Right),
+            );
 
             table.add_row(row);
 
@@ -94,7 +126,7 @@ pub fn show<S: BuildHasher>(data: &HashMap<&str, Data, S>) {
     }
 
     println!();
-    table.printstd();
+    println!("{table}");
     println!();
 }
 
