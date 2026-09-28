@@ -85,20 +85,20 @@ pub fn run(dirs: &[&str], config: &Config) {
     }
 }
 
-#[cfg(not(feature = "spectrum-scale"))]
+#[cfg(not(feature = "storage-scale"))]
 fn run_conditional(dir: &str, config: &Config) -> Result<Data> {
     stor_age::universal(dir, &config.ages_in_days, config.one_file_system)
 }
 
-#[cfg(feature = "spectrum-scale")]
+#[cfg(feature = "storage-scale")]
 fn run_conditional(dir: &str, config: &Config) -> Result<Data> {
-    if config.spectrum_scale {
-        stor_age::spectrum_scale(
+    if config.storage_scale {
+        stor_age::storage_scale(
             dir,
             &config.ages_in_days,
-            config.spectrum_scale_nodes.as_deref(),
-            config.spectrum_scale_local_work_dir.as_deref(),
-            config.spectrum_scale_global_work_dir.as_deref(),
+            config.storage_scale_nodes.as_deref(),
+            config.storage_scale_local_work_dir.as_deref(),
+            config.storage_scale_global_work_dir.as_deref(),
         )
     } else {
         stor_age::universal(dir, &config.ages_in_days, config.one_file_system)

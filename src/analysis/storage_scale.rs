@@ -11,7 +11,7 @@ use tempfile::{tempdir, tempdir_in};
 
 use crate::Data;
 
-/// Runs `mmapplypolicy` on Spectrum Scale file systems.
+/// Runs `mmapplypolicy` on IBM Storage Scale file systems.
 ///
 /// # Errors
 ///

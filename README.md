@@ -138,9 +138,9 @@ feature is enabled by default and what the rationale of this feature is.
     metrics in monitoring systems (e.g. `--format prometheus`), you can disable
     this feature to minimize dependencies.
 
--   **spectrum-scale**
+-   **storage-scale**
 
-    Adds an optional file system iteration mode specific to IBM Spectrum Scale
+    Adds an optional file system iteration mode specific to IBM Storage Scale
     file systems. This iteration mode uses the `mmapplypolicy` command instead
     of universal directory traversal ([std::fs::read_dir][read_dir]).
 

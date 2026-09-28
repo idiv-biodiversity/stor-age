@@ -113,47 +113,51 @@ fn conditional_compilation_args() -> Vec<Arg> {
             )
             .display_order(1),
 
-        #[cfg(feature = "spectrum-scale")]
-        Arg::new("spectrum-scale")
-            .long("spectrum-scale")
+        #[cfg(feature = "storage-scale")]
+        Arg::new("storage-scale")
+            .long("storage-scale")
+            .visible_aliases(["gpfs", "spectrum-scale"])
             .action(ArgAction::SetTrue)
             .help("use mmapplypolicy instead of universal directory traversal")
             .long_help(
-"On IBM Spectrum Scale file systems exists a dedicated command that allows \
+"On IBM Storage Scale file systems exists a dedicated command that allows \
  more efficient file system traversal, called `mmapplypolicy`. Using this \
  flag forces the usage of this command over the universal directory \
- traversal. At the time of this writing, according to Spectrum Scale \
+ traversal. At the time of this writing, according to IBM Storage Scale \
  documentation, only the super-user `root` may use the `mmapplypolicy` \
  command.",
             )
             .display_order(2),
 
-        #[cfg(feature = "spectrum-scale")]
-        Arg::new("spectrum-scale-N")
-            .long("spectrum-scale-N")
+        #[cfg(feature = "storage-scale")]
+        Arg::new("storage-scale-N")
+            .long("storage-scale-N")
+            .visible_aliases(["gpfs-N", "spectrum-scale-N"])
             .action(ArgAction::Set)
             .help("use for mmapplypolicy -N argument")
             .long_help(
 "Specify list of nodes to use with `mmapplypolicy -N`. For detailed \
- information, see `man mmapplypolicy`. Implies `--spectrum-scale`.",
+ information, see `man mmapplypolicy`. Implies `--storage-scale`.",
             )
             .value_name("all|mount|Node,...|NodeFile|NodeClass"),
 
-        #[cfg(feature = "spectrum-scale")]
-        Arg::new("spectrum-scale-g")
-            .long("spectrum-scale-g")
+        #[cfg(feature = "storage-scale")]
+        Arg::new("storage-scale-g")
+            .long("storage-scale-g")
+            .visible_aliases(["gpfs-g", "spectrum-scale-g"])
             .help("use for mmapplypolicy -g argument")
             .long_help(
 "Specify global work directory to use with `mmapplypolicy -g`. For detailed \
- information, see `man mmapplypolicy`. Implies `--spectrum-scale`.",
+ information, see `man mmapplypolicy`. Implies `--storage-scale`.",
             )
             .action(ArgAction::Set)
             .value_name("dir")
             .value_parser(is_dir),
 
-        #[cfg(feature = "spectrum-scale")]
-        Arg::new("spectrum-scale-s")
-            .long("spectrum-scale-s")
+        #[cfg(feature = "storage-scale")]
+        Arg::new("storage-scale-s")
+            .long("storage-scale-s")
+            .visible_aliases(["gpfs-s", "spectrum-scale-s"])
             .help("use for mmapplypolicy -s argument and policy output")
             .long_help(
 "Specify local work directory to use with `mmapplypolicy -s`. Also, the \
@@ -162,7 +166,7 @@ fn conditional_compilation_args() -> Vec<Arg> {
  directory. This might be too small for large directories, e.g. more than 30 \
  GiB are needed for a directory with 180 million files. For detailed \
  information about the `-s` argument, see `man mmapplypolicy`. Implies \
- `--spectrum-scale`.",
+ `--storage-scale`.",
             )
             .action(ArgAction::Set)
             .value_name("dir")

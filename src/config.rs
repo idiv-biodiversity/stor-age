@@ -12,17 +12,17 @@ pub struct Config {
 
     pub one_file_system: bool,
 
-    #[cfg(feature = "spectrum-scale")]
-    pub spectrum_scale: bool,
+    #[cfg(feature = "storage-scale")]
+    pub storage_scale: bool,
 
-    #[cfg(feature = "spectrum-scale")]
-    pub spectrum_scale_nodes: Option<String>,
+    #[cfg(feature = "storage-scale")]
+    pub storage_scale_nodes: Option<String>,
 
-    #[cfg(feature = "spectrum-scale")]
-    pub spectrum_scale_global_work_dir: Option<String>,
+    #[cfg(feature = "storage-scale")]
+    pub storage_scale_global_work_dir: Option<String>,
 
-    #[cfg(feature = "spectrum-scale")]
-    pub spectrum_scale_local_work_dir: Option<String>,
+    #[cfg(feature = "storage-scale")]
+    pub storage_scale_local_work_dir: Option<String>,
 }
 
 impl Config {
@@ -61,25 +61,25 @@ impl Config {
 
             one_file_system,
 
-            #[cfg(feature = "spectrum-scale")]
-            spectrum_scale: args.get_flag("spectrum-scale")
-                || args.contains_id("spectrum-scale-N")
-                || args.contains_id("spectrum-scale-g")
-                || args.contains_id("spectrum-scale-s"),
+            #[cfg(feature = "storage-scale")]
+            storage_scale: args.get_flag("storage-scale")
+                || args.contains_id("storage-scale-N")
+                || args.contains_id("storage-scale-g")
+                || args.contains_id("storage-scale-s"),
 
-            #[cfg(feature = "spectrum-scale")]
-            spectrum_scale_nodes: args
-                .get_one::<String>("spectrum-scale-N")
+            #[cfg(feature = "storage-scale")]
+            storage_scale_nodes: args
+                .get_one::<String>("storage-scale-N")
                 .cloned(),
 
-            #[cfg(feature = "spectrum-scale")]
-            spectrum_scale_global_work_dir: args
-                .get_one::<String>("spectrum-scale-g")
+            #[cfg(feature = "storage-scale")]
+            storage_scale_global_work_dir: args
+                .get_one::<String>("storage-scale-g")
                 .cloned(),
 
-            #[cfg(feature = "spectrum-scale")]
-            spectrum_scale_local_work_dir: args
-                .get_one::<String>("spectrum-scale-s")
+            #[cfg(feature = "storage-scale")]
+            storage_scale_local_work_dir: args
+                .get_one::<String>("storage-scale-s")
                 .cloned(),
         }
     }

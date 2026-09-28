@@ -8,7 +8,7 @@ readme = "README.md"
 documentation = "https://github.com/idiv-biodiversity/stor-age"
 homepage = "https://github.com/idiv-biodiversity/stor-age"
 repository = "https://github.com/idiv-biodiversity/stor-age"
-keywords = ["storage", "age", "spectrum-scale"]
+keywords = ["storage", "age", "gpfs", "spectrum-scale", "storage-scale"]
 categories = ["command-line-utilities", "filesystem"]
 edition = "2024"
 rust-version = "1.88"
@@ -44,7 +44,7 @@ optional = true
 
 [features]
 default = ["table"]
-spectrum-scale = ["bstr", "tempfile"]
+storage-scale = ["bstr", "tempfile"]
 table = ["bytesize", "comfy-table", "smooth"]
 
 [dev-dependencies]

@@ -1,3 +1,3 @@
-#[cfg(feature = "spectrum-scale")]
-pub mod spectrum_scale;
+#[cfg(feature = "storage-scale")]
+pub mod storage_scale;
 pub mod universal;

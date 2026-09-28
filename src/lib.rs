@@ -5,7 +5,7 @@ mod analysis;
 mod data;
 pub mod output;
 
-#[cfg(feature = "spectrum-scale")]
-pub use analysis::spectrum_scale::run as spectrum_scale;
+#[cfg(feature = "storage-scale")]
+pub use analysis::storage_scale::run as storage_scale;
 pub use analysis::universal::run as universal;
 pub use data::Data;
