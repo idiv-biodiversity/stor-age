@@ -10,7 +10,7 @@ use std::io::{self, IsTerminal, Read};
 use anyhow::{Context, Result};
 use stor_age::Data;
 
-use crate::cli::Output;
+use crate::cli::OutputFormat;
 use crate::config::Config;
 
 fn main() -> Result<()> {
@@ -62,7 +62,7 @@ pub fn run(dirs: &[&str], config: &Config) {
 
         match result {
             Ok(acc) => {
-                if config.output == Output::Oneline {
+                if config.output == OutputFormat::Oneline {
                     stor_age::output::oneline(dir, &acc);
                 } else {
                     results.insert(dir, acc);
@@ -77,11 +77,11 @@ pub fn run(dirs: &[&str], config: &Config) {
 
     match config.output {
         #[cfg(feature = "table")]
-        Output::Markdown => stor_age::output::table(&results, true),
-        Output::Prometheus => stor_age::output::prometheus(&results),
-        Output::Oneline => {} // do nothing because immediately handled above
+        OutputFormat::Markdown => stor_age::output::table(&results, true),
+        OutputFormat::Prometheus => stor_age::output::prometheus(&results),
+        OutputFormat::Oneline => {} // do nothing because immediately handled above
         #[cfg(feature = "table")]
-        Output::Table => stor_age::output::table(&results, false),
+        OutputFormat::Table => stor_age::output::table(&results, false),
     }
 }
 

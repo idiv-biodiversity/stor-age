@@ -62,7 +62,7 @@ pub fn build(stdin_terminal: bool) -> Command {
         )
         .action(ArgAction::Set)
         .ignore_case(true)
-        .value_parser(EnumValueParser::<Output>::new())
+        .value_parser(EnumValueParser::<OutputFormat>::new())
         .display_order(1);
 
     let format = if cfg!(feature = "table") {
@@ -189,11 +189,11 @@ fn is_dir(s: &str) -> Result<String, String> {
 }
 
 // ----------------------------------------------------------------------------
-// output enum
+// output format enum
 // ----------------------------------------------------------------------------
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Output {
+pub enum OutputFormat {
     #[cfg(feature = "table")]
     Markdown,
     Oneline,
@@ -202,7 +202,7 @@ pub enum Output {
     Table,
 }
 
-impl Output {
+impl OutputFormat {
     #[must_use]
     pub const fn name(self) -> &'static str {
         match self {
@@ -216,7 +216,7 @@ impl Output {
     }
 }
 
-impl ValueEnum for Output {
+impl ValueEnum for OutputFormat {
     fn value_variants<'a>() -> &'a [Self] {
         &[
             #[cfg(feature = "table")]
@@ -233,7 +233,7 @@ impl ValueEnum for Output {
     }
 }
 
-impl FromStr for Output {
+impl FromStr for OutputFormat {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {

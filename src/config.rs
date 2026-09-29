@@ -1,6 +1,6 @@
 use clap::ArgMatches;
 
-use crate::Output;
+use crate::OutputFormat;
 
 #[allow(clippy::struct_excessive_bools)]
 #[derive(Clone, Debug)]
@@ -8,7 +8,7 @@ pub struct Config {
     pub debug: bool,
     pub progress: bool,
     pub ages_in_days: Vec<u64>,
-    pub output: Output,
+    pub output: OutputFormat,
 
     pub one_file_system: bool,
 
@@ -42,7 +42,7 @@ impl Config {
         ages_in_days.dedup();
 
         let output = args
-            .get_one::<Output>("format")
+            .get_one::<OutputFormat>("format")
             .copied()
             .expect("format is required or has default");
 
