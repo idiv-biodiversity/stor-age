@@ -1,5 +1,5 @@
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
 use clap::builder::{EnumValueParser, PossibleValue};
@@ -47,8 +47,10 @@ pub fn build(stdin_terminal: bool) -> Command {
         .last(true)
         .value_parser(is_dir);
 
-    let format = Arg::new("format")
-        .long("format")
+    let output_format = Arg::new("output-format")
+        .short('f')
+        .long("output-format")
+        .visible_alias("format")
         .help("output format")
         .long_help(
 "Specify output format of the report. `prometheus` uses the Prometheus \
@@ -60,16 +62,36 @@ pub fn build(stdin_terminal: bool) -> Command {
  shows a markdown-formatted table that can be rendered by pandoc, GitHub, and \
  GitLab."
         )
-        .action(ArgAction::Set)
+        .action(ArgAction::Append)
         .ignore_case(true)
         .value_parser(EnumValueParser::<OutputFormat>::new())
         .display_order(1);
 
-    let format = if cfg!(feature = "table") {
-        format.default_value("table")
+    let output_format = if cfg!(feature = "table") {
+        output_format.default_value("table")
     } else {
-        format.required(true)
+        output_format.required(true)
     };
+
+    let output_path = Arg::new("output-path")
+        .short('o')
+        .long("output-path")
+        .visible_alias("output")
+        .help("output format and path")
+        .long_help(
+"Specify output format and path of the report. `prometheus` uses the \
+ Prometheus metric exposition format. `oneline` is intended as \
+ machine-readable output that shows a colon (\":\") separated list of age, \
+ total, accessed, and modified size in bytes, total, accessed, and modified \
+ number of files, followed by the directory. `table` (cargo feature, enabled \
+ by default) shows a pretty-printed table, while `markdown` (also the `table` \
+ cargo feature) shows a markdown-formatted table that can be rendered by \
+ pandoc, GitHub, and GitLab."
+        )
+        .action(ArgAction::Append)
+        .value_name("/path/to/file")
+        .value_parser(value_parser!(OutputPath))
+        .display_order(1);
 
     let help = Arg::new("help")
         .short('?')
@@ -90,7 +112,8 @@ pub fn build(stdin_terminal: bool) -> Command {
         .arg(age)
         .arg(dir)
         .arg(debug)
-        .arg(format)
+        .arg(output_format)
+        .arg(output_path)
         .arg(progress)
         .args(conditional_compilation_args())
         .disable_help_flag(true)
@@ -248,6 +271,29 @@ impl FromStr for OutputFormat {
             #[cfg(feature = "table")]
             "table" => Ok(Self::Table),
             _ => Err(String::from("invalid output")),
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------
+// output path enum
+// ----------------------------------------------------------------------------
+
+#[derive(Clone, Default, Debug, PartialEq, Eq)]
+pub enum OutputPath {
+    #[default]
+    Stdout,
+    Path(PathBuf),
+}
+
+impl From<&str> for OutputPath {
+    fn from(s: &str) -> Self {
+        let s = s.to_lowercase();
+        let s = s.as_str();
+
+        match s {
+            "-" => Self::Stdout,
+            s => Self::Path(PathBuf::from(s)),
         }
     }
 }

@@ -1,4 +1,5 @@
 use std::collections::BTreeMap;
+use std::io::{self, Write};
 
 use bytesize::ByteSize;
 use comfy_table::presets;
@@ -7,7 +8,14 @@ use smooth::Smooth;
 
 use crate::Data;
 
-pub fn show(data: &BTreeMap<&str, Data>, markdown: bool) {
+/// # Errors
+///
+/// - when writing to `output` fails
+pub fn show(
+    data: &BTreeMap<&str, Data>,
+    markdown: bool,
+    output: &mut impl Write,
+) -> io::Result<()> {
     let mut table = Table::new();
 
     if markdown {
@@ -50,9 +58,7 @@ pub fn show(data: &BTreeMap<&str, Data>, markdown: bool) {
         }
     }
 
-    println!();
-    println!("{table}");
-    println!();
+    writeln!(output, "{table}")
 }
 
 fn row(

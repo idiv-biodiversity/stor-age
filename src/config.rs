@@ -1,6 +1,10 @@
 use clap::ArgMatches;
+use itertools::{
+    EitherOrBoth::{Both, Left, Right},
+    Itertools,
+};
 
-use crate::OutputFormat;
+use crate::cli::{OutputFormat, OutputPath};
 
 #[allow(clippy::struct_excessive_bools)]
 #[derive(Clone, Debug)]
@@ -8,8 +12,7 @@ pub struct Config {
     pub debug: bool,
     pub progress: bool,
     pub ages_in_days: Vec<u64>,
-    pub output: OutputFormat,
-
+    pub outputs: Vec<(OutputFormat, OutputPath)>,
     pub one_file_system: bool,
 
     #[cfg(feature = "storage-scale")]
@@ -41,10 +44,24 @@ impl Config {
         ages_in_days.sort_unstable();
         ages_in_days.dedup();
 
-        let output = args
-            .get_one::<OutputFormat>("format")
-            .copied()
+        let output_formats = args
+            .get_many::<OutputFormat>("output-format")
             .expect("format is required or has default");
+
+        let output_paths = args
+            .get_many::<OutputPath>("output-path")
+            .unwrap_or_default();
+
+        let outputs = output_formats
+            .zip_longest(output_paths)
+            .map(|pair| match pair {
+                Both(format, path) => (*format, path.clone()),
+                Left(format) => (*format, OutputPath::default()),
+                Right(path) => {
+                    panic!("output path {path:?} without output format")
+                }
+            })
+            .collect();
 
         let debug = args.get_flag("debug");
         let progress = args.get_flag("progress") || debug;
@@ -57,7 +74,7 @@ impl Config {
             debug,
             progress,
             ages_in_days,
-            output,
+            outputs,
 
             one_file_system,
 

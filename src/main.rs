@@ -5,12 +5,13 @@ mod cli;
 mod config;
 
 use std::collections::BTreeMap;
-use std::io::{self, IsTerminal, Read};
+use std::fs::File;
+use std::io::{self, IsTerminal, Read, Write};
 
 use anyhow::{Context, Result};
 use stor_age::Data;
 
-use crate::cli::OutputFormat;
+use crate::cli::{OutputFormat, OutputPath};
 use crate::config::Config;
 
 fn main() -> Result<()> {
@@ -62,11 +63,16 @@ pub fn run(dirs: &[&str], config: &Config) {
 
         match result {
             Ok(acc) => {
-                if config.output == OutputFormat::Oneline {
-                    stor_age::output::oneline(dir, &acc);
-                } else {
-                    results.insert(dir, acc);
+                if config.outputs.iter().any(|(format, path)| {
+                    *format == OutputFormat::Oneline
+                        && *path == OutputPath::Stdout
+                }) && let Err(err) =
+                    stor_age::output::oneline(dir, &acc, &mut io::stdout())
+                {
+                    log::error!("{err}");
                 }
+
+                results.insert(dir, acc);
             }
 
             Err(error) => {
@@ -75,13 +81,44 @@ pub fn run(dirs: &[&str], config: &Config) {
         }
     }
 
-    match config.output {
-        #[cfg(feature = "table")]
-        OutputFormat::Markdown => stor_age::output::table(&results, true),
-        OutputFormat::Prometheus => stor_age::output::prometheus(&results),
-        OutputFormat::Oneline => {} // do nothing because immediately handled above
-        #[cfg(feature = "table")]
-        OutputFormat::Table => stor_age::output::table(&results, false),
+    for (format, path) in config.outputs.iter().filter(|(format, path)| {
+        *format != OutputFormat::Oneline || *path != OutputPath::Stdout
+    }) {
+        let mut path: Box<dyn Write> = match path {
+            OutputPath::Stdout => Box::new(io::stdout()),
+
+            OutputPath::Path(path) => match File::create(path) {
+                Ok(file) => Box::new(file),
+                Err(err) => {
+                    log::error!("{err}");
+                    continue;
+                }
+            },
+        };
+
+        let result = match format {
+            #[cfg(feature = "table")]
+            OutputFormat::Markdown => {
+                stor_age::output::table(&results, true, &mut path)
+            }
+
+            OutputFormat::Oneline => {
+                stor_age::output::oneline_all(&results, &mut path)
+            }
+
+            OutputFormat::Prometheus => {
+                stor_age::output::prometheus(&results, &mut path)
+            }
+
+            #[cfg(feature = "table")]
+            OutputFormat::Table => {
+                stor_age::output::table(&results, false, &mut path)
+            }
+        };
+
+        if let Some(err) = result.err() {
+            log::error!("{err}");
+        }
     }
 }
 
