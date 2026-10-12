@@ -77,17 +77,8 @@ pub fn build(stdin_terminal: bool) -> Command {
         .short('o')
         .long("output-path")
         .visible_alias("output")
-        .help("output format and path")
-        .long_help(
-"Specify output format and path of the report. `prometheus` uses the \
- Prometheus metric exposition format. `oneline` is intended as \
- machine-readable output that shows a colon (\":\") separated list of age, \
- total, accessed, and modified size in bytes, total, accessed, and modified \
- number of files, followed by the directory. `table` (cargo feature, enabled \
- by default) shows a pretty-printed table, while `markdown` (also the `table` \
- cargo feature) shows a markdown-formatted table that can be rendered by \
- pandoc, GitHub, and GitLab."
-        )
+        .help("output path")
+        .long_help("Specify output path of the report.")
         .action(ArgAction::Append)
         .value_name("/path/to/file")
         .value_parser(value_parser!(OutputPath))
