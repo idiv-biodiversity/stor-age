@@ -84,7 +84,7 @@ pub fn run(dirs: &[&str], config: &Config) {
     for (format, path) in config.outputs.iter().filter(|(format, path)| {
         *format != OutputFormat::Oneline || *path != OutputPath::Stdout
     }) {
-        let mut path: Box<dyn Write> = match path {
+        let mut output: Box<dyn Write> = match path {
             OutputPath::Stdout => Box::new(io::stdout()),
 
             OutputPath::Path(path) => match File::create(path) {
@@ -99,20 +99,20 @@ pub fn run(dirs: &[&str], config: &Config) {
         let result = match format {
             #[cfg(feature = "table")]
             OutputFormat::Markdown => {
-                stor_age::output::table(&results, true, &mut path)
+                stor_age::output::table(&results, true, &mut output)
             }
 
             OutputFormat::Oneline => {
-                stor_age::output::oneline_all(&results, &mut path)
+                stor_age::output::oneline_all(&results, &mut output)
             }
 
             OutputFormat::Prometheus => {
-                stor_age::output::prometheus(&results, &mut path)
+                stor_age::output::prometheus(&results, &mut output)
             }
 
             #[cfg(feature = "table")]
             OutputFormat::Table => {
-                stor_age::output::table(&results, false, &mut path)
+                stor_age::output::table(&results, false, &mut output)
             }
         };
 
