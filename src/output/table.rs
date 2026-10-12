@@ -2,8 +2,8 @@ use std::collections::BTreeMap;
 use std::io::{self, Write};
 
 use bytesize::ByteSize;
-use comfy_table::presets;
 use comfy_table::{Attribute, Cell, CellAlignment, Row, Table};
+use comfy_table::{ContentArrangement, presets};
 use smooth::Smooth;
 
 use crate::Data;
@@ -17,6 +17,7 @@ pub fn show(
     output: &mut impl Write,
 ) -> io::Result<()> {
     let mut table = Table::new();
+    table.set_content_arrangement(ContentArrangement::Disabled);
 
     if markdown {
         table.load_style(presets::ASCII_MARKDOWN);
