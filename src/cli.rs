@@ -284,9 +284,6 @@ pub enum OutputPath {
 
 impl From<&str> for OutputPath {
     fn from(s: &str) -> Self {
-        let s = s.to_lowercase();
-        let s = s.as_str();
-
         match s {
             "-" => Self::Stdout,
             s => Self::Path(PathBuf::from(s)),
