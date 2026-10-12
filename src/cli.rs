@@ -134,6 +134,7 @@ fn conditional_compilation_args() -> Vec<Arg> {
             .long("storage-scale")
             .visible_aliases(["gpfs", "spectrum-scale"])
             .action(ArgAction::SetTrue)
+            .help_heading("IBM Storage Scale Options")
             .help("use mmapplypolicy instead of universal directory traversal")
             .long_help(
 "On IBM Storage Scale file systems exists a dedicated command that allows \
@@ -142,14 +143,14 @@ fn conditional_compilation_args() -> Vec<Arg> {
  traversal. At the time of this writing, according to IBM Storage Scale \
  documentation, only the super-user `root` may use the `mmapplypolicy` \
  command.",
-            )
-            .display_order(2),
+            ),
 
         #[cfg(feature = "storage-scale")]
         Arg::new("storage-scale-N")
             .long("storage-scale-N")
             .visible_aliases(["gpfs-N", "spectrum-scale-N"])
             .action(ArgAction::Set)
+            .help_heading("IBM Storage Scale Options")
             .help("use for mmapplypolicy -N argument")
             .long_help(
 "Specify list of nodes to use with `mmapplypolicy -N`. For detailed \
@@ -161,6 +162,7 @@ fn conditional_compilation_args() -> Vec<Arg> {
         Arg::new("storage-scale-g")
             .long("storage-scale-g")
             .visible_aliases(["gpfs-g", "spectrum-scale-g"])
+            .help_heading("IBM Storage Scale Options")
             .help("use for mmapplypolicy -g argument")
             .long_help(
 "Specify global work directory to use with `mmapplypolicy -g`. For detailed \
@@ -174,6 +176,7 @@ fn conditional_compilation_args() -> Vec<Arg> {
         Arg::new("storage-scale-s")
             .long("storage-scale-s")
             .visible_aliases(["gpfs-s", "spectrum-scale-s"])
+            .help_heading("IBM Storage Scale Options")
             .help("use for mmapplypolicy -s argument and policy output")
             .long_help(
 "Specify local work directory to use with `mmapplypolicy -s`. Also, the \
