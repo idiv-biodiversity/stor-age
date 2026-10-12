@@ -51,6 +51,7 @@ pub fn build(stdin_terminal: bool) -> Command {
         .short('f')
         .long("output-format")
         .visible_alias("format")
+        .help_heading("Report Options")
         .help("output format")
         .long_help(
 "Specify output format of the report. `prometheus` uses the Prometheus \
@@ -77,6 +78,7 @@ pub fn build(stdin_terminal: bool) -> Command {
         .short('o')
         .long("output-path")
         .visible_alias("output")
+        .help_heading("Report Options")
         .help("output path")
         .long_help("Specify output path of the report.")
         .action(ArgAction::Append)
