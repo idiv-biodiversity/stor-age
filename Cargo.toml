@@ -6,7 +6,6 @@ description = "show aging of directories"
 license = "GPL-3.0-or-later"
 readme = "README.md"
 documentation = "https://github.com/idiv-biodiversity/stor-age"
-homepage = "https://github.com/idiv-biodiversity/stor-age"
 repository = "https://github.com/idiv-biodiversity/stor-age"
 keywords = ["storage", "age", "gpfs", "spectrum-scale", "storage-scale"]
 categories = ["command-line-utilities", "filesystem"]
